@@ -1,3 +1,7 @@
+"""
+Build an MCP server for SumOmniEval.
+"""
+
 import os
 import sys
 
