@@ -22,14 +22,83 @@ cp .env.example .env
 # Edit .env with your H2OGPTE credentials
 
 # 4. Launch
-streamlit run app.py
+streamlit run ui/app.py
 ```
 
-The app opens at `http://localhost:8501`
+The app opens at `http://localhost:8501`. Use the sidebar to navigate between:
+- **Standalone Evaluators** - Manual evaluation with all metrics
+- **Agent Evaluation** - AI agent-driven evaluation
+- **MCP Dashboard** - Build bundles and test tools
 
 ---
 
-## What's Inside
+## Four Ways to Use SumOmniEval
+
+### 1. Standalone Evaluators (Streamlit App)
+Use the interactive web interface to evaluate summaries manually.
+
+```bash
+streamlit run ui/app.py
+```
+
+Supports CSV, JSON, Excel (.xlsx), and TSV file uploads. Map your columns to Source, Summary, and Reference (optional).
+
+### 2. Python Library
+Import and use metrics directly in your code.
+
+```python
+from src.evaluators.tool_logic import run_metric, run_multiple_metrics, list_available_metrics
+
+# Run a single metric
+result = run_metric(
+    metric_name="rouge",
+    summary="The cat sat on the mat.",
+    reference_summary="A cat was sitting on a mat."
+)
+print(result["scores"])  # {'rouge1': 0.67, 'rouge2': 0.5, 'rougeL': 0.67}
+
+# Run multiple metrics at once
+results = run_multiple_metrics(
+    metric_names=["rouge", "bertscore", "bleu"],
+    summary="Generated summary text",
+    source="Original source document",
+    reference_summary="Reference summary"
+)
+
+# List all available metrics
+metrics = list_available_metrics()
+```
+
+### 3. Agent with Code Execution Tools
+Let an AI agent use the evaluation metrics as callable tools via H2OGPTE.
+
+```bash
+python agents/h2o/orchestrator.py --agent-type agent --sample grenfell_tower
+```
+
+The agent uploads `tool_logic.py` and executes metrics directly through code execution.
+
+### 4. Agent with MCP Server
+Use the Model Context Protocol (MCP) for structured tool access.
+
+```bash
+# First, bundle the MCP server
+python mcp_server/bundle.py
+
+# Run agent with MCP
+python agents/h2o/orchestrator.py --agent-type agent_with_mcp --sample grenfell_tower
+```
+
+The MCP server exposes these tools:
+- `list_metrics()` - List all available metrics
+- `recommend_metrics(has_source, has_reference)` - Get recommended metrics
+- `run_single_metric(metric_name, summary, source, reference)` - Run one metric
+- `run_multiple(metrics, summary, source, reference)` - Run multiple metrics
+- `get_info(metric_name)` - Get metric details
+
+---
+
+## Metrics Overview
 
 ### Stage 1: Source vs Summary (12 metrics)
 Checks if the summary is **accurate** and **complete** based on the original source.
@@ -93,34 +162,44 @@ All local models download automatically on first use:
 
 ```
 SumOmniEval/
-├── app.py                      # Main Streamlit application
 ├── requirements.txt            # Python dependencies
 ├── METRICS.md                  # Complete metrics documentation
 ├── .env.example                # API configuration template
 │
+├── ui/                         # Streamlit application
+│   ├── app.py                  # Main entry point (standalone evaluators)
+│   └── pages/
+│       ├── 1_Agent_Evaluation.py   # Agent-based evaluation UI
+│       └── 2_MCP_Dashboard.py      # MCP server management & testing
+│
 ├── src/evaluators/
+│   ├── tool_logic.py           # Unified tool interface (CLI + library)
 │   ├── era1_word_overlap.py    # ROUGE, BLEU, METEOR, etc.
 │   ├── era2_embeddings.py      # BERTScore, MoverScore
 │   ├── era3_logic_checkers.py  # NLI, FactCC, AlignScore
 │   ├── era3_llm_judge.py       # G-Eval, DAG, Prometheus
-│   ├── era3_unieval.py         # UniEval (disabled)
 │   └── completeness_metrics.py # Semantic Coverage, BERTScore Recall
+│
+├── agents/
+│   ├── h2o/
+│   │   └── orchestrator.py     # H2OGPTE agent orchestrator
+│   ├── prompts/
+│   │   ├── system.md           # Agent system prompt
+│   │   └── user.md             # User prompt template
+│   └── shared_utils.py         # Shared utilities for agents
+│
+├── mcp_server/
+│   ├── server.py               # MCP server implementation
+│   └── bundle.py               # Bundle server for deployment
+│
+├── data/
+│   └── sample_summaries.json   # Sample evaluation data
 │
 ├── tests/
 │   └── test_all_metrics.py     # Comprehensive test suite
 │
 └── examples/                   # Sample datasets (CSV, JSON, Excel)
 ```
-
----
-
-## File Upload
-
-Supports CSV, JSON, Excel (.xlsx), and TSV files.
-
-1. Upload your file in the sidebar
-2. Map columns: Source, Summary, Reference (optional)
-3. Select a row to evaluate
 
 ---
 
@@ -148,7 +227,7 @@ H2OGPTE_ADDRESS=https://your-instance.h2ogpte.com
 python -m pytest tests/test_all_metrics.py -v
 
 # Quick syntax check
-python -m py_compile app.py
+python -m py_compile ui/app.py
 ```
 
 ---
@@ -183,9 +262,9 @@ See [METRICS.md](METRICS.md) for alternatives.
 
 ## Version
 
+- **v2.1** - Added agent integration and MCP server support
 - **v2.0** - 24 metrics, educational UI
-- Last updated: 2026-01-29
 
-```
-streamlit run app.py
-```
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
