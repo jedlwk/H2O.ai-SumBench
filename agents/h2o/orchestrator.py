@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from dotenv import load_dotenv
 from h2ogpte import H2OGPTE
-from shared_utils import load_prompt, load_summaries
+from shared_utils import load_prompt, load_summaries, render_dynamic_prompt
 
 BASE_DIR = os.path.dirname(__file__)
 TOOL_FILE = os.path.join(BASE_DIR, '..', '..', 'src', 'evaluators', 'tool_logic.py')
@@ -93,29 +93,38 @@ def setup_collection(client: H2OGPTE, agent_type: str) -> str:
     return collection_id
 
 
-def run_evaluation(client: H2OGPTE, generated_summary: str, reference_summary: str = None, source: str = None) -> str:
+def run_evaluation(collection_id: str, client: H2OGPTE, agent_type: str, generated_summary: str, reference_summary: str = None, source: str = None) -> str:
     """Run the agent evaluation on the given summaries."""
-    chat_session_id = client.create_chat_session()
+    chat_session_id = client.create_chat_session(collection_id)
     print(f"Chat session created: {chat_session_id}")
 
     # Load prompts
     system_prompt = load_prompt('system.md')
-    user_prompt_template = load_prompt('user.md')
 
-    user_prompt = user_prompt_template.format(
+    # Render dynamic prompt
+    user_prompt = render_dynamic_prompt(
+        'user.md',
         generated_summary=generated_summary,
-        reference_summary=reference_summary or "Not provided",
-        source=source or "Not provided",
+        reference_summary=reference_summary,
+        source=source
     )
 
-    print("Running agent query...")
+    # Select tool based on agent type
+    tool_name = ""
+    if agent_type == "agent":
+        tool_name = "tool_logic"
+    else:
+        tool_name = "sum_omni_eval_mcp"
+
+    print(f"Running agent query with tool: {tool_name}...")
     with client.connect(chat_session_id) as session:
         reply = session.query(
-            user_prompt,
+            message=user_prompt,
+            system_prompt=system_prompt,
             llm_args=dict(
                 use_agent=True,
                 agent_type="auto",
-                agent_code_writer_system_message=system_prompt
+                agent_tools=[tool_name]
             )
         )
 
@@ -124,18 +133,20 @@ def run_evaluation(client: H2OGPTE, generated_summary: str, reference_summary: s
 
 def main(sample_idx: str = "0", agent_type: str = "agent"):
     """Main entry point."""
-    # Load sample data (field mapping is applied automatically)
+    # Load sample data
     sample = load_summaries(sample_idx=int(sample_idx))
     sample_id = sample.get('id', sample_idx)
     print(f"Loaded sample: {sample_id}")
 
     # Create client and setup
     client = create_client()
-    setup_collection(client, agent_type)
+    collection_id = setup_collection(client, agent_type)
 
     # Run evaluation
     response = run_evaluation(
+        collection_id=collection_id,
         client=client,
+        agent_type=agent_type,
         generated_summary=sample['summary'],
         reference_summary=sample.get('reference_summary'),
         source=sample.get('source')

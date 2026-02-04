@@ -1,12 +1,24 @@
-Evaluate the quality of this generated summary. I have a reference summary available.
+# EVALUATION TASK
+Evaluate the quality of the generated summary provided below.
 
-Generated Summary:
-{generated_summary}
+### DATA INPUTS
+**Generated Summary:** {{ generated_summary }}
 
-Reference Summary:
-{reference_summary}
+{% if source %}
+**Source Text:** {{ source }}
+{% endif %}
 
-Please:
-1. First list the recommended metrics for this scenario
-2. Run the appropriate metrics
-3. Provide an overall quality assessment based on the results
+{% if reference_summary %}
+**Reference Summary:** {{ reference_summary }}
+{% endif %}
+
+### INSTRUCTIONS
+1. **Scenario Detection:** You have been provided with 
+   {%- if source and reference_summary %} both the Source and a Reference summary.
+   {%- elif source %} only the Source text.
+   {%- elif reference_summary %} only a Reference summary.
+   {%- else %} neither the Source nor a Reference.
+   {%- endif %}
+2. **Metric Selection:** Refer to your SYSTEM PROMPT decision guide and run the `recommend` tool for this specific scenario.
+3. **Execution:** Call the appropriate metrics via `tool_logic.py`.
+4. **Synthesis:** Provide a final quality assessment based on the results.
