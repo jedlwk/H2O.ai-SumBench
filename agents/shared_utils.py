@@ -60,7 +60,7 @@ def load_summaries(sample_idx: int = None, data_file: str = None) -> dict:
     Returns:
         Dictionary containing the sample(s).
     """
-    file_path = data_file if data_file is not None else DATA_FILE
+    file_path = os.path.join(PROJECT_ROOT, data_file) if data_file is not None else DATA_FILE
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Data file not found: '{file_path}'")
 

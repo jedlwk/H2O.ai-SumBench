@@ -126,7 +126,7 @@ def run_evaluation(collection_id: str, client: H2OGPTE, agent_type: str, generat
     agent_type_str = "auto"
     if agent_type == "agent":
         agent_type_str = "general"
-    else:
+    else:  # agent_with_mcp
         agent_type_str = "mcp_tool_runner"
 
     # Warmup: ensure MCP server is fully initialized before running evaluation
@@ -162,7 +162,14 @@ def run_evaluation(collection_id: str, client: H2OGPTE, agent_type: str, generat
                     )
 
     # Load prompts
-    system_prompt = load_prompt('system.md')
+    system_prompt = load_prompt('system_base.md')
+
+    # Load system prompt based on agent type
+    system_prompt = load_prompt('system_base.md')
+    if agent_type == "agent":
+        system_prompt += "\n" + load_prompt('system_agent.md')
+    else:  # agent_with_mcp
+        system_prompt += "\n" + load_prompt('system_mcp.md')
 
     # Render dynamic prompt
     user_prompt = render_dynamic_prompt(
