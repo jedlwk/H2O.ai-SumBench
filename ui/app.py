@@ -106,6 +106,33 @@ section[data-testid="stSidebar"] > div {
     margin: 1.5rem 0;
 }
 
+/* Section divider -- heavy gold bar for major sections (Faithfulness / Completeness / Holistic) */
+.section-divider {
+    border: none;
+    border-top: 3px solid #FEC925;
+    margin: 2rem 0 1.5rem 0;
+}
+
+/* Metric divider -- subtle separator between individual metrics within a section */
+.metric-divider {
+    border: none;
+    border-top: 1px solid #2A2A3E;
+    margin: 1rem 0;
+}
+
+/* Assessment summary box */
+.assessment-box {
+    border: 4px solid #4A90D9;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 1.5rem 0 0.5rem 0;
+}
+.assessment-box.good { border-color: #28a745; background: rgba(40,167,69,0.08); }
+.assessment-box.mixed { border-color: #FEC925; background: rgba(254,201,37,0.08); }
+.assessment-box.bad { border-color: #dc3545; background: rgba(220,53,69,0.08); }
+.assessment-box .assess-title { font-weight: 700; font-size: 1.05em; }
+.assessment-box .assess-note { margin-top: 8px; font-size: 0.9em; opacity: 0.85; }
+
 /* Educational callout box */
 .edu-callout {
     border-left: 4px solid #FEC925;
@@ -831,7 +858,6 @@ def display_results(results: Dict[str, Dict[str, Any]]):
     show_token_warning = word_count > 400
     has_reference = st.session_state.get('has_reference', False)
 
-    st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
     st.header("Evaluation Results")
 
     # Show truncation warning if source text exceeds 400 words
@@ -865,7 +891,6 @@ def display_results(results: Dict[str, Dict[str, Any]]):
         faith_results = results["faithfulness"]
 
         # NLI Score
-        st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
         col1, col2 = st.columns([1, 2])
         with col1:
             nli_score = faith_results.get("NLI", {})
@@ -881,6 +906,7 @@ def display_results(results: Dict[str, Dict[str, Any]]):
             render_score_interpretation("NLI", nli_score.get('nli_score', 0))
 
         # FactCC Score
+        st.markdown('<div class="metric-divider"></div>', unsafe_allow_html=True)
         if "FactCC" in faith_results:
             col1, col2 = st.columns([1, 2])
             with col1:
@@ -896,6 +922,7 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 render_score_interpretation("FactCC", factcc_score['score'])
 
         # AlignScore
+        st.markdown('<div class="metric-divider"></div>', unsafe_allow_html=True)
         if "AlignScore" in faith_results:
             col1, col2 = st.columns([1, 2])
             with col1:
@@ -911,6 +938,7 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 render_score_interpretation("AlignScore", align_score['score'])
 
         # Coverage Score (NER overlap)
+        st.markdown('<div class="metric-divider"></div>', unsafe_allow_html=True)
         if "Coverage" in faith_results:
             col1, col2 = st.columns([1, 2])
             coverage_result = faith_results.get("Coverage", {})
@@ -930,24 +958,24 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 render_score_interpretation("EntityCoverage", coverage_result['score'])
 
         # Faithfulness Score Guide
-        st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
         nli_val = faith_results.get("NLI", {}).get('nli_score', 0)
         factcc_val = faith_results.get("FactCC", {}).get('score', 0) if faith_results.get("FactCC", {}).get('error') is None else 0
         align_val = faith_results.get("AlignScore", {}).get('score', 0) if faith_results.get("AlignScore", {}).get('error') is None else 0
         avg_faith = (nli_val + factcc_val + align_val) / 3 if (nli_val and factcc_val and align_val) else 0
 
         if avg_faith >= 0.7:
-            st.success(f"✅ **Faithfulness Assessment:** The summary appears well-supported by the source (avg: {avg_faith:.0%})")
+            tier_class, icon = "good", "✅"
+            msg = f"The summary appears well-supported by the source (avg: {avg_faith:.0%})"
         elif avg_faith >= 0.4:
-            truncation_note = ""
-            if show_token_warning:
-                truncation_note = f"\n\n**Note:** Your source text ({word_count:,} words) exceeds the ~400 word limit for these models. The faithfulness metrics only evaluated the first ~400 words of the source, which may explain lower scores if key content appears later in the document."
-            st.warning(f"⚠️ **Faithfulness Assessment:** Some claims may need verification (avg: {avg_faith:.0%}){truncation_note}")
+            tier_class, icon = "mixed", "⚠️"
+            msg = f"Some claims may need verification (avg: {avg_faith:.0%})"
         else:
-            truncation_note = ""
-            if show_token_warning:
-                truncation_note = f"\n\n**Note:** Your source text ({word_count:,} words) exceeds the ~400 word limit for these models. The faithfulness metrics only evaluated the first ~400 words of the source, which may explain lower scores if key content appears later in the document."
-            st.error(f"❌ **Faithfulness Assessment:** Review carefully for potential errors (avg: {avg_faith:.0%}){truncation_note}")
+            tier_class, icon = "bad", "❌"
+            msg = f"Review carefully for potential errors (avg: {avg_faith:.0%})"
+        truncation_note = ""
+        if avg_faith < 0.7 and show_token_warning:
+            truncation_note = f'<div class="assess-note"><strong>Note:</strong> Your source text ({word_count:,} words) exceeds the ~400 word limit for these models. The faithfulness metrics only evaluated the first ~400 words of the source, which may explain lower scores if key content appears later in the document.</div>'
+        st.markdown(f'<div class="assessment-box {tier_class}">{icon} <span class="assess-title">Faithfulness Assessment:</span> {msg}{truncation_note}</div>', unsafe_allow_html=True)
 
     # ─────────────────────────────────────────────────────────────────────────
     # COMPLETENESS (Substance) - Key points captured
@@ -958,7 +986,7 @@ def display_results(results: Dict[str, Dict[str, Any]]):
     has_completeness_llm = "completeness" in results and results["completeness"]
 
     if has_completeness_local or has_completeness_llm:
-        st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
         st.markdown("### Completeness -- *Did the summary capture what matters?*")
         st.markdown("""
         > **Why it matters:** A summary might be accurate but miss important information.
@@ -971,7 +999,6 @@ def display_results(results: Dict[str, Dict[str, Any]]):
 
             # Semantic Coverage
             if "SemanticCoverage" in local_comp:
-                st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
                 col1, col2 = st.columns([1, 2])
                 with col1:
                     sc_result = local_comp["SemanticCoverage"]
@@ -988,6 +1015,7 @@ def display_results(results: Dict[str, Dict[str, Any]]):
 
             # BERTScore Recall
             if "BERTScoreRecall" in local_comp:
+                st.markdown('<div class="metric-divider"></div>', unsafe_allow_html=True)
                 col1, col2 = st.columns([1, 2])
                 with col1:
                     bs_result = local_comp["BERTScoreRecall"]
@@ -1001,196 +1029,59 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 if bs_result.get('error') is None and bs_result.get('recall') is not None:
                     render_score_interpretation("BERTScoreRecall", bs_result['recall'])
 
-        # Show LLM Completeness Metrics (G-Eval, DAG, Prometheus)
-        if has_completeness_llm:
-            st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
-            comp_results = results["completeness"]
-            if "error" in comp_results:
-                st.error(f"Error: {comp_results['error']}")
-            else:
-                with st.expander("What is G-Eval?"):
-                    st.markdown("""
-                    **G-Eval** uses a large language model (LLM) to evaluate text like a human expert would.
-                    It uses chain-of-thought prompting to reason about each dimension before assigning a score.
+        # Completeness Assessment Summary
+        if has_completeness_local:
+            local = results.get("completeness_local", {})
+            sem_cov = local.get("SemanticCoverage", {})
+            cov_score = sem_cov.get('score')
 
-                    **The 4 Dimensions (1-10 scale):**
+            if cov_score is not None:
+                if cov_score >= 0.6:
+                    tier_class, icon = "good", "✅"
+                    msg = f"Good coverage of source content (Semantic Coverage: {cov_score:.0%})"
+                elif cov_score >= 0.3:
+                    tier_class, icon = "mixed", "⚠️"
+                    msg = f"Partial coverage — some source content may be missing (Semantic Coverage: {cov_score:.0%})"
+                else:
+                    tier_class, icon = "bad", "❌"
+                    msg = f"Low coverage — consider including more key points (Semantic Coverage: {cov_score:.0%})"
+                st.markdown(f'<div class="assessment-box {tier_class}">{icon} <span class="assess-title">Completeness Assessment:</span> {msg}</div>', unsafe_allow_html=True)
 
-                    | Dimension | Question Asked | Finance Example | Accident Example |
-                    |-----------|----------------|-----------------|-----------------|
-                    | **Relevance** | "Did it cover the important points?" | Revenue, margins, guidance | Cause, casualties, response |
-                    | **Coherence** | "Does it flow logically?" | Results → analysis → outlook | Timeline: before → during → after |
-                    | **Faithfulness** | "Is everything accurate?" | Are the numbers correct? | Are casualty counts right? |
-                    | **Fluency** | "Is it well-written?" | Professional analyst tone | Clear incident report style |
+                with st.expander("Why Coverage May Differ from Quality"):
+                    # Get coverage info if available
+                    cov_info = ""
+                    if "completeness_local" in results:
+                        local = results["completeness_local"]
+                        if "SemanticCoverage" in local and local["SemanticCoverage"].get('score') is not None:
+                            sc = local["SemanticCoverage"]
+                            cov_sent = sc.get('covered_sentences', 0)
+                            src_sent = sc.get('source_sentences', 1)
+                            cov_info = f"Your summary covers **{cov_sent} of {src_sent}** source sentences ({sc['score']:.0%})."
 
-                    **Interpreting Scores:** 9-10: Excellent | 7-8: Good | 5-6: Acceptable | Below 5: Needs improvement
+                    st.markdown(f"""
+                    {cov_info}
+
+                    **Coverage metrics** (Semantic Coverage, BERTScore Recall) measure **breadth**:
+                    - "What percentage of the source is represented in the summary?"
+                    - A short summary will naturally have low coverage
+
+                    **Holistic metrics** (below) measure **depth and quality**:
+                    - "Are the important points included, and is the summary accurate and clear?"
+                    - See the Holistic Assessment section for G-Eval, DAG, and Prometheus scores
+
+                    **Common Interpretation:**
+                    - Low coverage + High holistic scores = **Concise, focused summary** (often acceptable)
+                    - High coverage + Low holistic scores = **Verbose, but may have issues** (needs review)
                     """)
-                    st.markdown("""
-                    <div class="caveat-box">
-                    <strong>Caveat:</strong> Scores depend on the LLM model selected. Different models may give different scores
-                    for the same summary. For consistency, always compare results using the same model.
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                # G-Eval: Relevance
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    rel_result = comp_results.get("relevance", {})
-                    if rel_result.get('error') is None and rel_result.get('score') is not None:
-                        raw_score = rel_result.get('raw_score', rel_result['score'] * 10)
-                        st.markdown(f"**3. G-Eval Relevance:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
-                    else:
-                        st.warning(f"{rel_result.get('error', 'No result')}")
-                with col2:
-                    st.markdown("**Main Points Check** -- *Are the important points from the source included?*")
-                    if rel_result.get('explanation'):
-                        st.caption(rel_result['explanation'])
-
-                # G-Eval: Coherence
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    coh_result = comp_results.get("coherence", {})
-                    if coh_result.get('error') is None and coh_result.get('score') is not None:
-                        raw_score = coh_result.get('raw_score', coh_result['score'] * 10)
-                        st.markdown(f"**4. G-Eval Coherence:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
-                    else:
-                        st.warning(f"{coh_result.get('error', 'No result')}")
-                with col2:
-                    st.markdown("**Logical Flow** -- *Does it flow logically from start to finish?*")
-                    st.caption("Checks if ideas connect naturally without abrupt jumps or contradictions.")
-
-                # G-Eval: Faithfulness
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    faith_result = comp_results.get("faithfulness", {})
-                    if faith_result.get('error') is None and faith_result.get('score') is not None:
-                        raw_score = faith_result.get('raw_score', faith_result['score'] * 10)
-                        st.markdown(f"**5. G-Eval Faithfulness:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
-                    else:
-                        st.warning(f"{faith_result.get('error', 'No result')}")
-                with col2:
-                    st.markdown("**Source Alignment** -- *Can every claim be traced to the source?*")
-                    st.caption("LLM reads both texts and verifies each summary claim against the source.")
-
-                # G-Eval: Fluency
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    flu_result = comp_results.get("fluency", {})
-                    if flu_result.get('error') is None and flu_result.get('score') is not None:
-                        raw_score = flu_result.get('raw_score', flu_result['score'] * 10)
-                        st.markdown(f"**6. G-Eval Fluency:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
-                    else:
-                        st.warning(f"{flu_result.get('error', 'No result')}")
-                with col2:
-                    st.markdown("**Writing Quality** -- *Is it grammatically correct and natural?*")
-                    st.caption("Evaluates grammar, word choice, and overall readability.")
-
-                # Consolidated G-Eval score interpretation
-                with st.expander("What do my G-Eval scores mean?"):
-                    geval_dimensions = [
-                        ("Relevance", comp_results.get("relevance", {})),
-                        ("Coherence", comp_results.get("coherence", {})),
-                        ("Faithfulness", comp_results.get("faithfulness", {})),
-                        ("Fluency", comp_results.get("fluency", {})),
-                    ]
-                    for dim_name, dim_result in geval_dimensions:
-                        raw = dim_result.get('raw_score')
-                        if raw is not None:
-                            if raw >= 8.0:
-                                color, tier = "#28a745", "Good"
-                            elif raw >= 5.0:
-                                color, tier = "#FEC925", "Mixed"
-                            else:
-                                color, tier = "#dc3545", "Needs Attention"
-                            st.markdown(
-                                f"**{dim_name}** ({raw:.1f}/10): "
-                                f"<span style='color: {color}; font-weight: bold;'>{tier}</span>",
-                                unsafe_allow_html=True
-                            )
-
-                    st.markdown("""
-                    <div class="score-interpretation">
-                    <strong>Score guide:</strong>
-                    <span style="color: #28a745;">&ge;8 = Good</span> |
-                    <span style="color: #FEC925;">5&ndash;8 = Mixed</span> |
-                    <span style="color: #dc3545;">&lt;5 = Needs Attention</span>
-                    </div>
-                    """, unsafe_allow_html=True)
 
                     st.markdown("""
                     <div class="edu-callout">
-                    <strong>Domain Example:</strong> A coherent earnings summary presents results logically (revenue, then margins, then guidance). Jumping between topics randomly lowers the Coherence score.
+                    <strong>Finance example:</strong> A 10-K filing has 200+ sentences. A 5-sentence summary = 2.5% coverage,
+                    but if those 5 sentences capture revenue, margins, guidance, risks, and outlook, holistic quality could be excellent.<br><br>
+                    <strong>Accident example:</strong> An investigation report with 30 findings summarized into 5 critical points = 17% coverage,
+                    but if those are the 5 most actionable findings, holistic quality could still score highly.
                     </div>
                     """, unsafe_allow_html=True)
-
-                    st.markdown("""
-                    <div class="caveat-box">
-                    <strong>Caveat:</strong> Scores depend on the LLM model used. Different models may give different scores for the same summary. Consistency is best when using the same model.
-                    </div>
-                    """, unsafe_allow_html=True)
-
-        # Completeness Assessment Summary
-        if has_completeness_llm and "error" not in results.get("completeness", {}):
-            comp = results["completeness"]
-            qual_scores = []
-            for k in ['relevance', 'coherence', 'faithfulness', 'fluency']:
-                if k in comp and comp[k].get('raw_score'):
-                    qual_scores.append(comp[k]['raw_score'])
-            avg_qual = sum(qual_scores) / len(qual_scores) if qual_scores else 0
-
-            st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
-            if avg_qual >= 8:
-                st.success(f"✅ **Completeness Assessment:** High-quality summary with good coverage of key points (avg G-Eval: {avg_qual:.0f}/10)")
-            elif avg_qual >= 6:
-                st.warning(f"⚠️ **Completeness Assessment:** Acceptable quality but may miss some points (avg G-Eval: {avg_qual:.0f}/10)")
-            else:
-                st.error(f"❌ **Completeness Assessment:** Consider revising for better coverage and clarity (avg G-Eval: {avg_qual:.0f}/10)")
-
-        # Completeness Interpretation Guide
-        with st.expander("Why Coverage May Differ from Quality"):
-            # Get coverage info if available
-            cov_info = ""
-            if "completeness_local" in results:
-                local = results["completeness_local"]
-                if "SemanticCoverage" in local and local["SemanticCoverage"].get('score') is not None:
-                    cov_score = local["SemanticCoverage"]['score']
-                    cov_sent = local["SemanticCoverage"].get('covered_sentences', 0)
-                    src_sent = local["SemanticCoverage"].get('source_sentences', 1)
-                    cov_info = f"Your summary covers **{cov_sent} of {src_sent}** source sentences ({cov_score:.0%})."
-
-            # Get quality info
-            avg_qual = 0
-            if has_completeness_llm and "error" not in results["completeness"]:
-                qual_scores = []
-                comp = results["completeness"]
-                for k in ['relevance', 'coherence', 'faithfulness', 'fluency']:
-                    if k in comp and comp[k].get('raw_score'):
-                        qual_scores.append(comp[k]['raw_score'])
-                avg_qual = sum(qual_scores) / len(qual_scores) if qual_scores else 0
-
-            st.markdown(f"""
-            {cov_info}
-
-            **Coverage metrics** measure **breadth**:
-            - "What percentage of the source is represented in the summary?"
-            - A short summary will naturally have low coverage
-
-            **Quality metrics** measure **depth**:
-            - "Is what's in the summary accurate, coherent, and well-written?"
-            - Average quality score: **{avg_qual:.0f}/10**
-
-            **Common Interpretation:**
-            - Low coverage + High quality = **Concise, focused summary** (often acceptable)
-            - High coverage + Low quality = **Verbose, but may have issues** (needs review)
-            """)
-
-            st.markdown("""
-            <div class="edu-callout">
-            <strong>Finance example:</strong> A 10-K filing has 200+ sentences. A 5-sentence summary = 2.5% coverage,
-            but if those 5 sentences capture revenue, margins, guidance, risks, and outlook, quality could be 9/10.<br><br>
-            <strong>Accident example:</strong> An investigation report with 30 findings summarized into 5 critical points = 17% coverage,
-            but if those are the 5 most actionable findings, relevance could be 8/10.
-            </div>
-            """, unsafe_allow_html=True)
 
     # ─────────────────────────────────────────────────────────────────────────
     # HOLISTIC ASSESSMENT - Metrics that evaluate both faithfulness AND completeness
@@ -1201,16 +1092,21 @@ def display_results(results: Dict[str, Dict[str, Any]]):
         comp_results = results["completeness"]
         has_dag = "dag" in comp_results and comp_results.get("dag", {}).get('error') is None
         has_prometheus = "prometheus" in comp_results and comp_results.get("prometheus", {}).get('error') is None
+        has_geval_faith = "faithfulness" in comp_results and comp_results.get("faithfulness", {}).get('error') is None
+        has_geval_rel = "relevance" in comp_results and comp_results.get("relevance", {}).get('error') is None
+        has_geval_coh = "coherence" in comp_results and comp_results.get("coherence", {}).get('error') is None
+        has_geval_flu = "fluency" in comp_results and comp_results.get("fluency", {}).get('error') is None
+        has_any_holistic = has_dag or has_prometheus or has_geval_faith or has_geval_rel or has_geval_coh or has_geval_flu
 
-        if has_dag or has_prometheus:
-            st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
-            st.markdown("### Holistic Assessment -- *End-to-end quality evaluation*")
+        if has_any_holistic:
+            st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+            st.markdown("### Holistic Assessment -- *Faithfulness + Completeness*")
             st.markdown("""
-            > **Why separate?** These metrics evaluate **both** faithfulness and completeness together,
-            > giving you a single score that considers accuracy, coverage, and clarity as one unit.
+            > These metrics evaluate **both faithfulness and completeness together** — checking that
+            > the summary is factually accurate and captures the key points from the source.
             """)
 
-            # DAG results
+            # 1. DAG results
             if has_dag:
                 dag_result = comp_results.get("dag", {})
                 st.markdown("**1. DAG** -- *Decision Tree: A 3-step checklist*")
@@ -1241,9 +1137,9 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 if dag_result.get('raw_score') is not None:
                     render_score_interpretation("DAG", dag_result['raw_score'])
 
-            # Prometheus results
+            # 2. Prometheus results
             if has_prometheus:
-                st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
+                st.markdown('<div class="metric-divider"></div>', unsafe_allow_html=True)
                 prom_result = comp_results.get("prometheus", {})
                 st.markdown("**2. Prometheus** -- *LLM Judge (1-5 scale)*")
                 with st.expander("What is Prometheus?"):
@@ -1283,9 +1179,140 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 if prom_result.get('raw_score') is not None:
                     render_score_interpretation("Prometheus", prom_result['raw_score'])
 
+            # 3. G-Eval (grouped as 3a-3d)
+            has_any_geval = has_geval_faith or has_geval_rel or has_geval_coh or has_geval_flu
+            if has_any_geval:
+                st.markdown('<div class="metric-divider"></div>', unsafe_allow_html=True)
+                st.markdown("**3. G-Eval** -- *LLM-based quality dimensions (1-10 scale)*")
+                with st.expander("What is G-Eval?"):
+                    st.markdown("""
+                    **G-Eval** uses a large language model (LLM) to evaluate text like a human expert would.
+                    It uses chain-of-thought prompting to reason about each dimension before assigning a score (1-10).
+
+                    | Dimension | What It Checks | Example |
+                    |-----------|---------------|---------|
+                    | **Faithfulness** | Are all claims traceable to the source? | Revenue numbers match the filing? |
+                    | **Relevance** | Are the important points included? | Key findings covered? |
+                    | **Coherence** | Does it flow logically? | Ideas connect without abrupt jumps? |
+                    | **Fluency** | Is it well-written? | Grammar and word choice natural? |
+
+                    **Interpreting Scores:** 9-10: Excellent | 7-8: Good | 5-6: Acceptable | Below 5: Needs improvement
+                    """)
+                    st.markdown("""
+                    <div class="caveat-box">
+                    <strong>Caveat:</strong> Scores depend on the LLM model selected. Different models may give different scores
+                    for the same summary. For consistency, always compare results using the same model.
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                # 3a. G-Eval: Faithfulness
+                if has_geval_faith:
+                    faith_result = comp_results.get("faithfulness", {})
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        if faith_result.get('score') is not None:
+                            raw_score = faith_result.get('raw_score', faith_result['score'] * 10)
+                            st.markdown(f"**3a. Faithfulness:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
+                        else:
+                            st.warning(f"{faith_result.get('error', 'No result')}")
+                    with col2:
+                        st.markdown("**Source Alignment** -- *Can every claim be traced to the source?*")
+                        st.caption("LLM reads both texts and verifies each summary claim against the source.")
+
+                # 3b. G-Eval: Relevance
+                if has_geval_rel:
+                    rel_result = comp_results.get("relevance", {})
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        if rel_result.get('score') is not None:
+                            raw_score = rel_result.get('raw_score', rel_result['score'] * 10)
+                            st.markdown(f"**3b. Relevance:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
+                        else:
+                            st.warning(f"{rel_result.get('error', 'No result')}")
+                    with col2:
+                        st.markdown("**Main Points Check** -- *Are the important points from the source included?*")
+                        st.caption("Checks whether the summary captures the key information from the source document.")
+
+                # 3c. G-Eval: Coherence
+                if has_geval_coh:
+                    coh_result = comp_results.get("coherence", {})
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        if coh_result.get('score') is not None:
+                            raw_score = coh_result.get('raw_score', coh_result['score'] * 10)
+                            st.markdown(f"**3c. Coherence:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
+                        else:
+                            st.warning(f"{coh_result.get('error', 'No result')}")
+                    with col2:
+                        st.markdown("**Logical Flow** -- *Does it flow logically from start to finish?*")
+                        st.caption("Checks if ideas connect naturally without abrupt jumps or contradictions.")
+
+                # 3d. G-Eval: Fluency
+                if has_geval_flu:
+                    flu_result = comp_results.get("fluency", {})
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        if flu_result.get('score') is not None:
+                            raw_score = flu_result.get('raw_score', flu_result['score'] * 10)
+                            st.markdown(f"**3d. Fluency:** {format_score_display(raw_score, 'geval', 10.0)}", unsafe_allow_html=True)
+                        else:
+                            st.warning(f"{flu_result.get('error', 'No result')}")
+                    with col2:
+                        st.markdown("**Writing Quality** -- *Is it grammatically correct and natural?*")
+                        st.caption("Evaluates grammar, word choice, and overall readability.")
+
+            # Consolidated G-Eval score interpretation (Faithfulness, Relevance, Coherence, Fluency)
+            if has_geval_faith or has_geval_rel or has_geval_coh or has_geval_flu:
+                with st.expander("What do my G-Eval scores mean?"):
+                    geval_dimensions = [
+                        ("Faithfulness", comp_results.get("faithfulness", {})),
+                        ("Relevance", comp_results.get("relevance", {})),
+                        ("Coherence", comp_results.get("coherence", {})),
+                        ("Fluency", comp_results.get("fluency", {})),
+                    ]
+                    for dim_name, dim_result in geval_dimensions:
+                        raw = dim_result.get('raw_score')
+                        if raw is not None:
+                            if raw >= 8.0:
+                                color, tier = "#28a745", "Good"
+                            elif raw >= 5.0:
+                                color, tier = "#FEC925", "Mixed"
+                            else:
+                                color, tier = "#dc3545", "Needs Attention"
+                            st.markdown(
+                                f"**{dim_name}** ({raw:.1f}/10): "
+                                f"<span style='color: {color}; font-weight: bold;'>{tier}</span>",
+                                unsafe_allow_html=True
+                            )
+
+                    st.markdown("""
+                    <div class="score-interpretation">
+                    <strong>Score guide:</strong>
+                    <span style="color: #28a745;">&ge;8 = Good</span> |
+                    <span style="color: #FEC925;">5&ndash;8 = Mixed</span> |
+                    <span style="color: #dc3545;">&lt;5 = Needs Attention</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    st.markdown("""
+                    <div class="edu-callout">
+                    <strong>Domain Example:</strong> A coherent earnings summary presents results logically (revenue, then margins, then guidance). Jumping between topics randomly lowers the Coherence score.
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    st.markdown("""
+                    <div class="caveat-box">
+                    <strong>Caveat:</strong> Scores depend on the LLM model used. Different models may give different scores for the same summary. Consistency is best when using the same model.
+                    </div>
+                    """, unsafe_allow_html=True)
+
             # Holistic Assessment Summary
-            st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
             summary_scores = []
+            # Include G-Eval scores (normalized to 10-point scale)
+            for geval_key in ['faithfulness', 'relevance', 'coherence', 'fluency']:
+                geval_result = comp_results.get(geval_key, {})
+                if geval_result.get('raw_score') is not None:
+                    summary_scores.append((geval_key.title(), geval_result['raw_score'], 10))
             if has_dag and dag_result.get('raw_score') is not None:
                 summary_scores.append(('DAG', dag_result['raw_score'], 6))
             if has_prometheus and prom_result.get('raw_score') is not None:
@@ -1297,18 +1324,22 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 avg_holistic = total_weighted / len(summary_scores)
 
                 if avg_holistic >= 0.75:
-                    st.success(f"✅ **Holistic Assessment:** The summary scores well across all dimensions (accuracy, coverage, clarity)")
+                    tier_class, icon = "good", "✅"
+                    msg = "The summary scores well across all dimensions (accuracy, coverage, clarity)"
                 elif avg_holistic >= 0.5:
-                    st.warning(f"⚠️ **Holistic Assessment:** The summary has room for improvement in some areas")
+                    tier_class, icon = "mixed", "⚠️"
+                    msg = "The summary has room for improvement in some areas"
                 else:
-                    st.error(f"❌ **Holistic Assessment:** The summary may need significant revision")
+                    tier_class, icon = "bad", "❌"
+                    msg = "The summary may need significant revision"
+                st.markdown(f'<div class="assessment-box {tier_class}">{icon} <span class="assess-title">Holistic Assessment:</span> {msg}</div>', unsafe_allow_html=True)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # STAGE 2: GENERATED vs. REFERENCE SUMMARY (CONFORMANCE)
     # Only shown if reference summary was provided
     # ═══════════════════════════════════════════════════════════════════════════
     if has_reference and (("semantic" in results and results["semantic"]) or ("lexical" in results and results["lexical"])):
-        st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
         st.subheader("Stage 2: Conformance Check")
         st.markdown("""
         *Comparing your **Generated Summary** against a **Reference Summary** (human-written gold standard)
@@ -1377,11 +1408,70 @@ def display_results(results: Dict[str, Dict[str, Any]]):
                 else:
                     st.error(f"Error: {mover_score['error']}")
 
-            # Score interpretations for semantic metrics
-            if bert_scores.get('error') is None:
-                render_score_interpretation("BERTScore", bert_scores.get('f1', 0))
-            if mover_score.get('error') is None:
-                render_score_interpretation("MoverScore", mover_score.get('moverscore', 0))
+            # Combined semantic score interpretation
+            if bert_scores.get('error') is None or mover_score.get('error') is None:
+                with st.expander("What do my BERTScore & MoverScore mean?"):
+                    # Show actual scores with color coding
+                    if bert_scores.get('error') is None:
+                        bert_f1 = bert_scores.get('f1', 0)
+                        if bert_f1 >= 0.75:
+                            b_color, b_tier = "#28a745", "Good"
+                        elif bert_f1 >= 0.5:
+                            b_color, b_tier = "#FEC925", "Mixed"
+                        else:
+                            b_color, b_tier = "#dc3545", "Needs Attention"
+                        st.markdown(
+                            f"**BERTScore F1** ({bert_f1:.3f}): "
+                            f"<span style='color: {b_color}; font-weight: bold;'>{b_tier}</span>",
+                            unsafe_allow_html=True
+                        )
+                    if mover_score.get('error') is None:
+                        mover_val = mover_score.get('moverscore', 0)
+                        if mover_val >= 0.75:
+                            m_color, m_tier = "#28a745", "Good"
+                        elif mover_val >= 0.5:
+                            m_color, m_tier = "#FEC925", "Mixed"
+                        else:
+                            m_color, m_tier = "#dc3545", "Needs Attention"
+                        st.markdown(
+                            f"**MoverScore** ({mover_val:.3f}): "
+                            f"<span style='color: {m_color}; font-weight: bold;'>{m_tier}</span>",
+                            unsafe_allow_html=True
+                        )
+
+                    st.markdown("""
+                    ---
+                    **What each measures:**
+
+                    | Metric | Approach | Analogy |
+                    |--------|----------|---------|
+                    | **BERTScore** | Token-level embedding similarity (precision/recall/F1) | "How much meaning overlaps between the two texts?" |
+                    | **MoverScore** | Optimal transport distance between embeddings | "How much effort to transform one meaning into the other?" |
+
+                    **Why both matter:** BERTScore checks token-by-token overlap and can miss issues
+                    where the same words appear in a different order or context. MoverScore captures
+                    semantic flow differences by measuring the minimum "cost" to rearrange meaning,
+                    so it catches re-ordering and structural issues that BERTScore may miss.
+                    """)
+
+                    st.markdown("""
+                    <div class="score-interpretation">
+                    <strong>Score guide:</strong>
+                    <span style="color: #28a745;">&ge;0.75 = Good</span> |
+                    <span style="color: #FEC925;">0.50&ndash;0.75 = Mixed</span> |
+                    <span style="color: #dc3545;">&lt;0.50 = Needs Attention</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    st.markdown("""
+                    <div class="edu-callout">
+                    <strong>Domain Examples:</strong><br>
+                    <strong>Finance:</strong> "EBITDA margin expanded 200bps" vs "profitability improved significantly" —
+                    BERTScore captures the shared concept of improvement; MoverScore penalises the loss of the specific metric.<br><br>
+                    <strong>Accident report:</strong> "3 fatalities occurred before emergency response" vs "emergency response followed 3 fatalities" —
+                    BERTScore sees the same tokens; MoverScore detects the subtle causal reordering.
+                    </div>
+                    """, unsafe_allow_html=True)
 
         # ─────────────────────────────────────────────────────────────────────
         # LEXICAL CONFORMANCE (Format/Structure)
@@ -1797,7 +1887,7 @@ def main():
         as a human-written reference, even with different words?<br><br>
         <strong>Lexical Match</strong> &mdash; Does the summary use the same words and
         structure? 
-        Essential when specific terminology must be preserved
+        Critical when terminology must be preserved
         (e.g., regulatory language, technical terms).<br><br>
         <span style="color:#888;">Only runs if you provide a reference summary.</span>
         </div>
