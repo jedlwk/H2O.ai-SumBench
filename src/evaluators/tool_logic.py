@@ -75,10 +75,6 @@ from .era3_llm_judge import (
     evaluate_prometheus as _evaluate_prometheus,
     evaluate_all as _evaluate_all_llm
 )
-from .era3_unieval import (
-    compute_unieval,
-    compute_all_unieval_metrics
-)
 from .completeness_metrics import (
     compute_semantic_coverage,
     compute_bertscore_recall_source,
@@ -1156,52 +1152,6 @@ def evaluate_all_llm_judge(
 
 
 # =============================================================================
-# ERA 3: UNIEVAL
-# =============================================================================
-
-def evaluate_unieval(
-    summary: str,
-    source: str,
-    reference_summary: Optional[str] = None,
-    dimensions: Optional[List[str]] = None
-) -> Dict[str, Any]:
-    """
-    Evaluate summary across multiple dimensions using UniEval's Boolean QA framework.
-
-    UniEval converts evaluation into yes/no questions for coherence, consistency,
-    and fluency. Provides multi-dimensional quality assessment from a unified model.
-
-    Args:
-        summary: The generated summary text to evaluate. Required.
-        source: The original source document text. Required.
-        reference_summary: Not used for UniEval (kept for API consistency).
-        dimensions: List of dimensions to evaluate. Options: ["coherence", "consistency", "fluency"].
-                   Default None evaluates all three.
-
-    Returns:
-        Dictionary containing:
-        - metric_name: "UniEval"
-        - scores: Dict with coherence, consistency, fluency scores (each 0-1)
-        - interpretation: Human-readable assessment for each dimension
-        - error: Error message if evaluation failed, None otherwise
-
-    Score ranges: 0.0 to 1.0 for each dimension. Higher is better.
-    """
-    result = compute_unieval(summary, source, reference_summary, dimensions)
-
-    return {
-        'metric_name': 'UniEval',
-        'scores': {
-            'coherence': result.get('coherence'),
-            'consistency': result.get('consistency'),
-            'fluency': result.get('fluency')
-        },
-        'interpretation': result.get('interpretations', {}),
-        'error': result.get('error')
-    }
-
-
-# =============================================================================
 # COMPLETENESS METRICS
 # =============================================================================
 
@@ -1575,16 +1525,6 @@ METRIC_REGISTRY: Dict[str, Dict[str, Any]] = {
         'description': 'All LLM judge metrics combined'
     },
 
-    # UniEval
-    'unieval': {
-        'function': evaluate_unieval,
-        'category': 'multi_dimensional',
-        'requires_source': True,
-        'requires_reference': False,
-        'requires_either': False,
-        'description': 'Multi-dimensional evaluation (coherence, consistency, fluency)'
-    },
-
     # Completeness
     'semantic_coverage': {
         'function': evaluate_semantic_coverage,
@@ -1663,7 +1603,6 @@ def list_metrics_by_category(category: str) -> List[Dict[str, Any]]:
     - semantic: BERTScore, MoverScore
     - factuality: NLI, FactCC, AlignScore, etc.
     - llm_judge: LLM-based G-Eval, DAG, Prometheus
-    - multi_dimensional: UniEval
     - completeness: Semantic Coverage, BERTScore Recall, BARTScore
     - fluency: Perplexity
 

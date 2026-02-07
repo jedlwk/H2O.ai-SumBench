@@ -14,21 +14,31 @@
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+# 1. One-shot install (dependencies + spaCy model + NLTK data)
+python setup.py
 
-# 2. Download spaCy model
-python -m spacy download en_core_web_sm
-
-# 3. Configure API for LLM metrics
+# 2. (Optional) Configure API for LLM metrics
 cp .env.example .env
+
+# 3. Launch
+streamlit run ui/app.py
 ```
+
+<details>
+<summary>Manual install (if you prefer)</summary>
+
+```bash
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python -c "import nltk; nltk.download('punkt_tab')"
+```
+</details>
 
 ---
 
 ## Three Ways to Use SumOmniEval
 
-### 1. Standalone Evaluators 
+### 1. Standalone Evaluators
 Use metrics directly in your code or as a interactive web app.
 
 Option 1: Use in Streamlit
@@ -157,7 +167,7 @@ Is the output readable, logical and well structured?
 
 | Mode | Metrics | Time | Requirements |
 |------|---------|------|--------------|
-| **Local Only** | 12 | ~30s | None |
+| **Local Only** | 14 | ~30s | None |
 | **Full Suite** | 24 | ~2min | H2OGPTE API key |
 
 ---
@@ -184,47 +194,61 @@ All local models download automatically on first use:
 
 ```
 SumOmniEval/
-├── requirements.txt            # Python dependencies
-├── METRICS.md                  # Complete metrics documentation
-├── .env.example                # Secrets and credentials
+├── setup.py                        # One-shot install script
+├── requirements.txt                # Python dependencies
+├── .env.example                    # Secrets and credentials
 │
-├── ui/                         # Streamlit application
-│   └── app.py                  # Main entry point (standalone evaluators)
+├── ui/                             # Streamlit application
+│   └── app.py                      # Main entry point (standalone evaluators)
 │
-├── src/evaluators/
-│   ├── tool_logic.py           # Unified tool interface (CLI + library)
-│   ├── h2ogpte_client.py       # Shared H2OGPTe client module
-│   ├── era1_word_overlap.py    # ROUGE, BLEU, METEOR, etc.
-│   ├── era2_embeddings.py      # BERTScore, MoverScore
-│   ├── era3_logic_checkers.py  # NLI, FactCC, AlignScore
-│   ├── era3_llm_judge.py       # G-Eval, DAG, Prometheus
-│   └── completeness_metrics.py # Semantic Coverage, BERTScore Recall
+├── src/
+│   ├── evaluators/
+│   │   ├── tool_logic.py           # Unified tool interface (CLI + library)
+│   │   ├── h2ogpte_client.py       # Shared H2OGPTe client module
+│   │   ├── era1_word_overlap.py    # ROUGE, BLEU, METEOR, etc.
+│   │   ├── era2_embeddings.py      # BERTScore, MoverScore
+│   │   ├── moverscore_v2_patched.py # Vendored MoverScore with CPU fix
+│   │   ├── moverscore_wrapper.py   # MoverScore wrapper
+│   │   ├── era3_logic_checkers.py  # NLI, FactCC, AlignScore
+│   │   ├── era3_llm_judge.py      # G-Eval, DAG, Prometheus
+│   │   └── completeness_metrics.py # Semantic Coverage, BERTScore Recall
+│   └── utils/
+│       ├── force_cpu.py            # Force CPU-only PyTorch mode
+│       └── data_loader.py          # Data loading utilities
 │
 ├── agents/
 │   ├── h2o/
-│   │   └── orchestrator.py     # H2OGPTE agent orchestrator
+│   │   └── orchestrator.py         # H2OGPTE agent orchestrator
 │   ├── prompts/
-│   │   ├── system.md           # Agent system prompt
-│   │   └── user.md             # User prompt template
-│   └── shared_utils.py         # Shared utilities for agents
+│   │   ├── system_base.md          # Shared foundation prompt
+│   │   ├── system_mcp.md           # MCP mode prompt
+│   │   ├── system_agent.md         # Agent mode prompt
+│   │   └── user.md                 # User prompt template
+│   └── shared_utils.py             # Shared utilities for agents
 │
 ├── mcp_server/
-│   ├── server.py               # MCP server implementation
-│   ├── envs.json               # Environment variables JSON
-│   └── bundle.py               # Bundle server for deployment
+│   ├── server.py                   # MCP server implementation
+│   ├── envs.json                   # Environment variables JSON
+│   └── bundle.py                   # Bundle server for deployment
 │
 ├── data/
-│   ├── examples/               # Template files (CSV, JSON, XLSX)
-│   ├── processed/              # Processed data with AI summaries 
-│   ├── raw/                    # Raw downloaded data 
-│   └── scripts/                # Data processing pipeline
+│   ├── examples/                   # Template files (CSV, JSON, XLSX)
+│   ├── processed/                  # Processed data with AI summaries
+│   ├── raw/                        # Raw downloaded data
+│   └── scripts/                    # Data processing pipeline
 │
-└── tests/
-│   ├── test_all_metrics.py.    # Comprehensive pytest test suite
-│   ├── test_h2ogpte_api.py.    # Raw downloaded data 
-│   ├── test_h2ogpte_models.py. # Model Availability Check
-│   ├── test_h2ogpte_agent.py   # Agent Tool Integration
-    └── test_simple_agent.py    # Simple agent framework demo
+├── tests/
+│   ├── test_all_metrics.py         # Comprehensive pytest test suite
+│   ├── test_h2ogpte_api.py         # API connection tests
+│   ├── test_h2ogpte_agent.py       # Agent tool integration
+│   └── test_simple_agent.py        # Simple agent framework demo
+│
+└── docs/
+    ├── GETTING_STARTED.md          # First-time user guide
+    ├── METRICS.md                  # Complete metrics documentation
+    ├── SETUP.md                    # Installation & troubleshooting
+    ├── FILE_FORMATS.md             # Dataset upload guide
+    └── CHANGELOG.md                # Version history
 ```
 
 ---
@@ -269,7 +293,8 @@ python -m py_compile ui/app.py
 
 ## Documentation
 
-- **[METRICS.md](METRICS.md)** - Complete guide to all 24 metrics
+- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - First-time setup walkthrough
+- **[docs/METRICS.md](docs/METRICS.md)** - Complete guide to all 24 metrics
 - **[docs/SETUP.md](docs/SETUP.md)** - Installation troubleshooting
 
 ---
@@ -282,12 +307,13 @@ python -m py_compile ui/app.py
 | QuestEval | Cython dependency issues |
 | UniEval | Fallback implementation unreliable |
 
-See [METRICS.md](METRICS.md) for alternatives.
+See [docs/METRICS.md](docs/METRICS.md) for alternatives.
 
 ---
 
 ## Version
 
+- **v3.0** - GitHub-ready release, setup script, documentation refresh
 - **v2.4** - New prompt architecture, enhanced documentation
 - **v2.3** - MCP warmup, system installation and dynamic Jinja2 prompt
 - **v2.2** - Restructure data folder, pipeline and documentation

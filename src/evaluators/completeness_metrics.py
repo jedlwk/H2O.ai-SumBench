@@ -227,12 +227,14 @@ def compute_bertscore_recall_source(
             device='cpu'
         )
 
-        recall = float(R[0])
+        recall = max(0.0, float(R[0]))
+        precision = max(0.0, float(P[0]))
+        f1 = max(0.0, float(F1[0]))
 
         return {
             'recall': round(recall, 4),
-            'precision': round(float(P[0]), 4),
-            'f1': round(float(F1[0]), 4),
+            'precision': round(precision, 4),
+            'f1': round(f1, 4),
             'interpretation': _interpret_bertscore_recall(recall),
             'error': None
         }

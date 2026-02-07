@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 ### 2. (Optional) Configure API Access
 
-For Era 3 API metrics, create `.env` file:
+For API metrics (G-Eval, DAG, Prometheus), create `.env` file:
 
 ```bash
 # Create .env in project root
@@ -30,7 +30,7 @@ EOF
 ### 3. Launch Application
 
 ```bash
-streamlit run app.py
+streamlit run ui/app.py
 ```
 
 App opens at: `http://localhost:8501`
@@ -76,13 +76,14 @@ pip install -r requirements.txt
 
 On first use, models auto-download:
 
-| Era | Models | Size | Download Time |
-|-----|--------|------|---------------|
-| Era 1 | GPT-2 (small), NLTK data | ~500MB | 1-2 min |
-| Era 2 | BERTScore, MoverScore | ~1.2GB | 3-5 min |
-| Era 3A | DeBERTa-v3, BERT-MNLI | ~800MB | 2-3 min |
+| Dimension | Models | Size | Download Time |
+|-----------|--------|------|---------------|
+| Surface Overlap | NLTK data | ~100MB | <1 min |
+| Semantic Alignment | BERTScore, MoverScore, BARTScore | ~3.3GB | 3-5 min |
+| Faithfulness | DeBERTa-v3, BERT-MNLI, AlignScore | ~2.3GB | 2-3 min |
+| Linguistic Quality | GPT-2 | ~600MB | 1-2 min |
 
-**Total**: ~2.5GB, 6-10 minutes (one-time only)
+**Total**: ~6GB, 6-10 minutes (one-time only)
 
 Models cache to: `~/.cache/huggingface/`
 
@@ -90,7 +91,7 @@ Models cache to: `~/.cache/huggingface/`
 
 ## API Configuration
 
-### H2OGPTE Setup (for Era 3 API metrics)
+### H2OGPTE Setup (for API metrics)
 
 **What you need**:
 - H2OGPTE API key
@@ -131,7 +132,7 @@ python3 tests/test_h2ogpte_api.py
 
 ### Without API Access
 
-You can still use **9 local metrics** (Era 1, 2, 3A):
+You can still use **14 local metrics**:
 - No API configuration needed
 - No internet required (after initial model download)
 - 100% free
@@ -145,11 +146,8 @@ Simply skip the API configuration step.
 ### Test All Metrics
 
 ```bash
-# Test local metrics (no API needed)
-python3 tests/test_evaluators.py
-
-# Test all metrics including API (requires .env)
-python3 tests/test_all_new_metrics.py
+# Test all metrics (requires .env for API metrics)
+python3 -m pytest tests/test_all_metrics.py -v
 ```
 
 ### Expected Output
@@ -238,13 +236,24 @@ python3 tests/test_h2ogpte_api.py
 python3 tests/test_corrected_models.py
 ```
 
+### Issue: `pyemd` fails to install on Windows
+
+**Problem**: `pyemd` requires a C++ compiler
+
+**Solution**: Install Visual Studio Build Tools:
+1. Download from [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+2. Select "Desktop development with C++" workload
+3. Restart terminal and retry `pip install -r requirements.txt`
+
+---
+
 ### Issue: Streamlit port already in use
 
 **Problem**: Port 8501 already occupied
 
 **Solution**: Use different port
 ```bash
-streamlit run app.py --server.port 8502
+streamlit run ui/app.py --server.port 8502
 ```
 
 ---
@@ -258,7 +267,7 @@ Change where models are downloaded:
 ```bash
 # Set environment variable
 export HF_HOME=/path/to/custom/cache
-streamlit run app.py
+streamlit run ui/app.py
 ```
 
 ### Custom API Timeout
@@ -272,7 +281,7 @@ timeout=60  # Change to 120 for slower connections
 
 ### Disable Specific Metrics
 
-Edit `app.py` to hide metrics in UI:
+Edit `ui/app.py` to hide metrics in UI:
 
 ```python
 # Example: Hide Era 2
@@ -303,14 +312,14 @@ available = {
 
 ### Performance Notes
 
-**Local metrics** (Era 1, 2, 3A):
+**Local metrics** (14 metrics):
 - CPU-only, no GPU needed
-- ~40 seconds on modern laptop
+- ~30 seconds on modern laptop
 - No ongoing internet required
 
-**API metrics** (Era 3B):
+**API metrics** (10 metrics):
 - Network dependent
-- ~7 minutes (depends on API latency)
+- ~2 minutes (depends on API latency)
 - Requires stable internet
 
 ---
@@ -372,7 +381,7 @@ RUN pip install -r requirements.txt
 COPY . .
 EXPOSE 8501
 
-CMD ["streamlit", "run", "app.py"]
+CMD ["streamlit", "run", "ui/app.py"]
 ```
 
 Build and run:
@@ -401,8 +410,8 @@ python3 --version
 # Check installed packages
 pip list | grep -E "(streamlit|transformers|torch|h2ogpte)"
 
-# Test local metrics
-python3 tests/test_evaluators.py
+# Test all metrics
+python3 -m pytest tests/test_all_metrics.py -v
 
 # Test API
 python3 tests/test_h2ogpte_api.py
@@ -466,5 +475,5 @@ def compute_metrics(source, summary):
 
 ---
 
-**Last Updated**: 2026-01-25
+**Last Updated**: 2026-02-07
 **Support**: See README.md for contact info

@@ -683,7 +683,6 @@ def compute_all_era3_metrics(
     use_factcc: bool = False,
     use_alignscore: bool = False,
     use_coverage: bool = False,
-    use_unieval: bool = False,
     factchecker_model: Optional[str] = None
 ) -> Dict[str, Dict[str, float]]:
     """
@@ -704,7 +703,6 @@ def compute_all_era3_metrics(
         use_factcc (bool, optional): Enable FactCC BERT model (~600MB). Default False
         use_alignscore (bool, optional): Enable AlignScore unified model (~1.3GB, RECOMMENDED). Default False
         use_coverage (bool, optional): Enable NER entity coverage check (requires spaCy). Default False
-        use_unieval (bool, optional): Enable UniEval multi-dimensional scorer. Default False
         factchecker_model (str, optional): LLM model name for API fact-checker. Default None (uses Llama-3.3-70B)
 
     Returns:
@@ -713,7 +711,6 @@ def compute_all_era3_metrics(
             - 'FactCC': If use_factcc=True - BERT-based consistency
             - 'AlignScore': If use_alignscore=True - Unified alignment (RECOMMENDED)
             - 'Coverage': If use_coverage=True - Named entity coverage
-            - 'UniEval': If use_unieval=True - Multi-dimensional evaluation
             - 'FactChecker': If use_factchecker=True - API-based claim verification
             Each value is a dict with score, interpretation, and possibly error keys.
 
@@ -749,11 +746,6 @@ def compute_all_era3_metrics(
     # Add Coverage Score if enabled (for completeness check)
     if use_coverage:
         results['Coverage'] = compute_coverage_score(summary=summary, source=source)
-
-    # Add UniEval if enabled (BLEURT backup - multi-dimensional evaluation)
-    if use_unieval:
-        from src.evaluators.era3_unieval import compute_unieval
-        results['UniEval'] = compute_unieval(summary=summary, source=source)
 
     # Add API-based fact-checker if enabled
     if use_factchecker:

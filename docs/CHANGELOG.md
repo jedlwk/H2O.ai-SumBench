@@ -4,6 +4,33 @@ All notable changes to this project are documented here.
 
 ---
 
+## [3.0.0] - 2026-02-07
+
+### GitHub-Ready Release
+
+Prepared the repository for a clean public release with reorganized files, refreshed documentation, and a one-shot setup script.
+
+### Added
+- **setup.py** - Cross-platform one-shot install script (pip + spaCy + NLTK)
+- **Windows note** in SETUP.md for `pyemd` Visual Studio Build Tools requirement
+- **.gitignore** entries for `.claude/`, `.venv/`, and sample data exception
+
+### Changed
+- **Moved** `GETTING_STARTED.md` and `METRICS.md` from root to `docs/`
+- **Documentation refresh** - Updated all docs to reflect 24 metrics, five-dimension naming (Faithfulness, Completeness, Semantic, Lexical, Linguistic Quality), and correct file paths (`ui/app.py`, `test_all_metrics.py`)
+- **README.md** - Added `python setup.py` quick start, fixed project structure tree, updated internal links to `docs/`
+- **GETTING_STARTED.md** - Full content rewrite with correct metric counts, dimension table, and v3.0 paths
+- **SETUP.md** - Fixed `app.py` → `ui/app.py` (4 occurrences), Docker CMD, test file references
+- **UI** - Button padding increased for better visibility, metric numbering improvements (from prior commit)
+- **Code cleanup** - Resolved 5 basedpyright unused-variable warnings in `ui/app.py`
+- **Version bump** to 3.0.0 across all files
+
+### Removed
+- **docs/workshop_lession_plan.txt** - Stale workshop planning document
+- Root-level `GETTING_STARTED.md` and `METRICS.md` (moved to `docs/`)
+
+---
+
 ## [2.4.0] - 2026-02-06
 
 ### Prompt System Refactoring and Documentation Improvements
@@ -750,6 +777,7 @@ See LICENSE file
 
 | Version | Focus Area | Key Achievement |
 |---------|-----------|-----------------|
+| 3.0.0 | GitHub Release | Setup script, docs refresh, file reorganization |
 | 2.4.0 | Prompt Architecture | Modular prompts (base/mcp/standalone), static system instructions |
 | 2.3.0 | Agent & MCP | MCP warmup, credential flow fix, dynamic prompts |
 | 2.2.0 | Data Infrastructure | Organized data pipeline with CNN/DM integration |
@@ -760,6 +788,6 @@ See LICENSE file
 
 ---
 
-**Current Version**: 2.4.0
-**Release Date**: 2026-02-06
+**Current Version**: 3.0.0
+**Release Date**: 2026-02-07
 **Status**: Production Ready ✅

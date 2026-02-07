@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 # Force CPU mode
-import force_cpu  # noqa: F401
+from src.utils import force_cpu  # noqa: F401
 
 import pytest
 from dotenv import load_dotenv

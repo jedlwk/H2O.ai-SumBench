@@ -1,4 +1,4 @@
-# SumOmniEval v2.0 - Requirements
+# SumOmniEval v3.0 - Requirements
 # 24 metrics across 2 evaluation stages
 # All local models < 2GB each | Total storage ~6GB
 
@@ -8,16 +8,18 @@
 streamlit==1.40.0           # Web UI
 pandas==2.2.0               # Data handling
 numpy==1.26.4               # CRITICAL: Must be 1.x for pyemd (MoverScore)
-openpyxl==3.1.2             # Excel file support
+openpyxl>=3.1.2             # Excel file support
 
 # =============================================================================
 # Deep Learning Stack
 # =============================================================================
-# PyTorch: Install separately for CPU-only: pip install torch --index-url https://download.pytorch.org/whl/cpu
-transformers==4.45.0        # HuggingFace models (NLI, FactCC, AlignScore, Perplexity)
-tokenizers==0.20.3          # Fast tokenization
+torch>=2.8.0                # PyTorch (CPU or CUDA - both work)
+torchvision>=0.23.0         # Required by some model pipelines
+transformers>=4.45.0        # HuggingFace models (NLI, FactCC, AlignScore, Perplexity)
+tokenizers>=0.20.3          # Fast tokenization
 sentencepiece==0.2.0        # Tokenizer for some models
-protobuf==3.20.3            # Model serialization
+tiktoken>=0.12.0            # Tokenizer for NLI / OpenAI-style models
+protobuf>=3.20.0            # Model serialization
 
 # =============================================================================
 # Stage 2 - Lexical Metrics (ROUGE, BLEU, METEOR, etc.)
@@ -33,9 +35,10 @@ Levenshtein==0.25.0         # Alternative binding
 # Stage 2 - Semantic Metrics (BERTScore, MoverScore)
 # Models: roberta-large (~1.4GB), distilbert (~260MB)
 # =============================================================================
-bert-score==0.3.13          # BERTScore (Precision/Recall/F1)
-sentence-transformers==2.2.2 # Semantic Coverage (MiniLM ~80MB)
-# MoverScore: pip install moverscore (or install from GitHub)
+bert-score>=0.3.12          # BERTScore (Precision/Recall/F1)
+sentence-transformers>=2.2.2 # Semantic Coverage (MiniLM ~80MB)
+pyemd>=1.0.0                # Earth Mover's Distance (required by MoverScore)
+# MoverScore: vendored as src/evaluators/moverscore_v2_patched.py (do NOT pip install moverscore)
 
 # =============================================================================
 # Stage 1 - Faithfulness Metrics (NLI, FactCC, AlignScore)
@@ -47,7 +50,7 @@ sentence-transformers==2.2.2 # Semantic Coverage (MiniLM ~80MB)
 # Stage 1 - Completeness (Coverage Score)
 # Model: en_core_web_sm (~12MB)
 # =============================================================================
-spacy==3.7.5                # Named Entity Recognition
+spacy>=3.7.5                # Named Entity Recognition
 # Run after install: python -m spacy download en_core_web_sm
 
 # =============================================================================
@@ -60,25 +63,19 @@ python-dotenv==1.0.0        # Load .env credentials
 # =============================================================================
 # HuggingFace Ecosystem
 # =============================================================================
-huggingface-hub==0.25.2     # Model downloads
-datasets==3.0.0             # Dataset utilities
+huggingface-hub>=0.25.2     # Model downloads
+datasets>=2.21.0            # Dataset utilities
 evaluate==0.4.3             # Evaluation utilities
-
-# =============================================================================
-# Agents and Orchestration
-# =============================================================================
-mcp==1.26.0                 # MCP server/client
 
 # =============================================================================
 # Utilities
 # =============================================================================
 tqdm==4.66.5                # Progress bars
-scikit-learn==1.5.2         # ML utilities
-pyyaml==6.0.2               # Config parsing
-regex==2024.9.11            # Advanced regex
-safetensors==0.4.5          # Safe model loading
-filelock==3.16.1            # File locking
-pytest==9.0.2               # Testing
+scikit-learn>=1.5.2         # ML utilities
+pyyaml>=6.0.2               # Config parsing
+regex>=2024.9.11            # Advanced regex
+safetensors>=0.4.5          # Safe model loading
+filelock>=3.16.1            # File locking
 
 # =============================================================================
 # NOT INCLUDED (and why)

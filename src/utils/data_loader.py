@@ -6,7 +6,7 @@ import os
 from typing import Dict, Optional
 
 # Load sample data as default
-DEFAULT_DATA = 'cnn_dm_sample_with_gen_sum.json'
+DEFAULT_DATA = 'sample_finance_accidents.json'
 
 
 def load_sample_data(data_path: Optional[str] = None) -> pd.DataFrame:
@@ -134,3 +134,27 @@ def get_sample_titles(data_path: Optional[str] = None, max_length: int = 100) ->
         titles.append(f"Sample {idx + 1}: {first_part}")
 
     return titles
+
+
+def get_sample_labels(data_path: Optional[str] = None) -> list:
+    """
+    Get descriptive labels for each sample from the 'label' field.
+
+    Falls back to "Sample N" if no label field exists.
+
+    Args:
+        data_path: Path to the data file. If None, uses default location.
+
+    Returns:
+        List of descriptive label strings.
+    """
+    df = load_sample_data(data_path)
+
+    labels = []
+    for idx, row in df.iterrows():
+        if 'label' in df.columns and pd.notna(row.get('label', None)):
+            labels.append(row['label'])
+        else:
+            labels.append(f"Sample {idx + 1}")
+
+    return labels

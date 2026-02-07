@@ -163,7 +163,7 @@ def compute_moverscore(
         # Import from wrapper instead of moverscore_v2 directly
         try:
             from .moverscore_wrapper import get_idf_dict, word_mover_score
-        except (ImportError, RuntimeError, AssertionError) as import_error:
+        except (ImportError, RuntimeError, AssertionError, AttributeError) as import_error:
             # CUDA error during import
             error_str = str(import_error)
             _MOVERSCORE_UNAVAILABLE = True

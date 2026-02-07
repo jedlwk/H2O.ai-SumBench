@@ -95,6 +95,15 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Claude Code local settings
+.claude/
+
+# Virtual environment (dotted variant)
+.venv/
+
+# Keep default sample data for demo
+!data/processed/sample_finance_accidents.json
+
 # MCP Server build artifacts
 *.zip
 mcp_server/dist_mcp/

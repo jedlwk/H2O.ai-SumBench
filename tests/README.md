@@ -42,15 +42,6 @@ python3 -m pytest tests/test_all_metrics.py -v
 python3 tests/test_h2ogpte_api.py
 ```
 
-**`test_h2ogpte_models.py`** - Model Availability Check
-- Lists all available models from the API
-- Verifies model names are correct
-- Useful for debugging model access issues
-
-```bash
-python3 tests/test_h2ogpte_models.py
-```
-
 ### Agent Integration Tests
 
 **`test_h2ogpte_agent.py`** - Agent Tool Integration
@@ -69,15 +60,6 @@ python3 tests/test_h2ogpte_agent.py
 
 ```bash
 python3 tests/test_simple_agent.py
-```
-
-**`example_tool.py`** - Example Tool Implementation
-- Example metric tool (ROUGE scores) for agent use
-- Shows proper tool schema and CLI argument handling
-- Can be used as a template for creating new metric tools
-
-```bash
-python3 tests/example_tool.py --summary "text" --source "text"
 ```
 
 ---
@@ -169,7 +151,6 @@ Test execution times (approximate):
 |-----------|------|-----------|-------|
 | test_all_metrics.py | ~5-10min | 6-8 | Comprehensive suite, includes API metrics |
 | test_h2ogpte_api.py | ~5s | 1 | Quick connectivity check |
-| test_corrected_models.py | ~5s | 1 | Lists available models |
 | test_h2ogpte_agent.py | ~30-60s | 2-3 | Agent tool integration |
 | test_simple_agent.py | ~30s | 0-1 | Simple agent framework demo |
 
@@ -180,6 +161,6 @@ Test execution times (approximate):
 
 ---
 
-**Last Updated**: 2026-02-06
-**Total Test Files**: 6
-**Coverage**: All 15+ metrics across 4 eras (Lexical, Semantic, Logic Checkers, LLM-as-a-Judge)
+**Last Updated**: 2026-02-07
+**Total Test Files**: 5
+**Coverage**: All 24 metrics across 5 dimensions (Faithfulness, Completeness, Semantic Alignment, Surface Overlap, Linguistic Quality)
