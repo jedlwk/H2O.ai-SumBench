@@ -272,44 +272,11 @@ H2OGPTE_ADDRESS=https://your-instance.h2ogpte.com
 
 ---
 
-## Running Tests
-
-```bash
-# Run all metric tests
-python -m pytest tests/test_all_metrics.py -v
-
-# Quick syntax check
-python -m py_compile ui/app.py
-```
-
----
-
-## Requirements
-
-- Python 3.8+
-- 8GB+ RAM recommended
-- ~6GB disk space (for models)
-- Internet connection (for API metrics)
-
----
-
 ## Documentation
 
 - **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - First-time setup walkthrough
 - **[docs/METRICS.md](docs/METRICS.md)** - Complete guide to all 24 metrics
 - **[docs/SETUP.md](docs/SETUP.md)** - Installation troubleshooting
-
----
-
-## Metrics Not Implemented
-
-| Metric | Reason |
-|--------|--------|
-| BLEURT | TensorFlow/PyTorch conflicts |
-| QuestEval | Cython dependency issues |
-| UniEval | Fallback implementation unreliable |
-
-See [docs/METRICS.md](docs/METRICS.md) for alternatives.
 
 ---
 
