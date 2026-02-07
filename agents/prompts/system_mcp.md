@@ -9,18 +9,18 @@
 2. **Metric Selection & Execution:** Use the MCP tool `run_multiple` with metrics appropriate for the detected scenario:
 
    **Scenario A: Source + Reference (Full Diagnostic)**
-   - Run all 22 metrics across all categories
-   - Metrics: `["rouge", "bleu", "meteor", "levenshtein", "perplexity", "chrf", "bertscore", "moverscore", "nli", "factcc", "alignscore", "entity_coverage", "factchecker_api", "semantic_coverage", "bertscore_recall", "bartscore", "llm_faithfulness", "llm_coherence", "llm_relevance", "llm_fluency", "llm_dag", "llm_prometheus"]`
+   - Run all available metrics across all categories
+   - Metrics: `["rouge", "bleu", "meteor", "levenshtein", "perplexity", "chrf", "bertscore", "entity_coverage", "factchecker_api", "semantic_coverage", "bertscore_recall", "llm_faithfulness", "llm_coherence", "llm_relevance", "llm_fluency", "llm_dag", "llm_prometheus"]`
    - Parameters: summary, source, reference
 
    **Scenario B: Source Only (Truth-First)**
    - Focus on factuality, completeness, and faithfulness metrics
-   - Metrics: `["nli", "factcc", "alignscore", "entity_coverage", "factchecker_api", "semantic_coverage", "bertscore_recall", "bartscore", "llm_faithfulness", "llm_relevance"]`
+   - Metrics: `["entity_coverage", "factchecker_api", "semantic_coverage", "bertscore_recall", "llm_faithfulness", "llm_relevance"]`
    - Parameters: summary, source
 
    **Scenario C: Reference Only (Stylistic-Match)**
    - Focus on word overlap, semantic similarity, and coherence metrics
-   - Metrics: `["rouge", "bleu", "meteor", "levenshtein", "perplexity", "chrf", "bertscore", "moverscore", "llm_coherence"]`
+   - Metrics: `["rouge", "bleu", "meteor", "levenshtein", "perplexity", "chrf", "bertscore", "llm_coherence"]`
    - Parameters: summary, reference
 
    **Scenario D: Neither (Linguistic-Sanity)**

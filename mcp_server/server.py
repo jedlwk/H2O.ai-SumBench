@@ -52,23 +52,47 @@ except ImportError:
 
 mcp = FastMCP("H2O.ai SumBench MCP Server")
 
+# Metrics that work reliably on any input length.
+# Excluded: nli, factcc, alignscore, moverscore, bartscore (truncate at 512-1024 tokens).
+SUPPORTED_METRICS = {
+    # Word overlap (no length limit)
+    'rouge', 'bleu', 'meteor', 'levenshtein', 'chrf',
+    # Fluency (evaluates summary only)
+    'perplexity',
+    # Semantic (library handles chunking internally)
+    'bertscore',
+    # Completeness (sentence-level / NER, no length limit)
+    'entity_coverage', 'semantic_coverage', 'bertscore_recall',
+    # LLM judge (H2OGPTE LLM handles long context)
+    'llm_faithfulness', 'llm_coherence', 'llm_relevance', 'llm_fluency',
+    'llm_dag', 'llm_prometheus', 'factchecker_api',
+}
+
 
 @mcp.tool()
 def list_metrics():
-    """List all available evaluation metrics."""
-    return list_available_metrics()
+    """List available evaluation metrics (only length-safe metrics are exposed)."""
+    all_metrics = list_available_metrics()
+    return [m for m in all_metrics if m.get('name', m) in SUPPORTED_METRICS]
 
 
 @mcp.tool()
 def run_single_metric(metric_name: str, summary: str, source: str = None, reference: str = None):
-    """Run a single evaluation metric."""
+    """Run a single evaluation metric. Only length-safe metrics are allowed."""
+    if metric_name not in SUPPORTED_METRICS:
+        return {'error': f"Metric '{metric_name}' is not available. Use list_metrics() to see supported metrics."}
     return run_metric(metric_name, summary, source, reference)
 
 
 @mcp.tool()
 def run_multiple(metrics: list, summary: str, source: str = None, reference: str = None):
-    """Run multiple evaluation metrics at once."""
-    return run_multiple_metrics(metrics, summary, source, reference)
+    """Run multiple evaluation metrics at once. Unsupported metrics are skipped."""
+    safe = [m for m in metrics if m in SUPPORTED_METRICS]
+    skipped = [m for m in metrics if m not in SUPPORTED_METRICS]
+    results = run_multiple_metrics(safe, summary, source, reference)
+    if skipped:
+        results['_skipped'] = {m: 'Not available (token length limit)' for m in skipped}
+    return results
 
 
 @mcp.tool()
