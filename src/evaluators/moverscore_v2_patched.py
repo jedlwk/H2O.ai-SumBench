@@ -2,14 +2,21 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 import torch
 import string
+import platform
 from pyemd import emd, emd_with_flow
 from torch import nn
 from math import log
 from itertools import chain
 
 from collections import defaultdict, Counter
-from multiprocessing import Pool
 from functools import partial
+
+# Windows: multiprocessing.Pool inside Streamlit causes freeze/crash
+# because Windows uses 'spawn' (not 'fork') and re-imports the module.
+# Fall back to single-threaded map on Windows.
+_USE_MULTIPROCESSING = platform.system() != 'Windows'
+if _USE_MULTIPROCESSING:
+    from multiprocessing import Pool
 
 
 from transformers import DistilBertConfig, DistilBertTokenizer, DistilBertModel
@@ -38,8 +45,11 @@ def get_idf_dict(arr, nthreads=4):
 
     process_partial = partial(process)
 
-    with Pool(nthreads) as p:
-        idf_count.update(chain.from_iterable(p.map(process_partial, arr)))
+    if _USE_MULTIPROCESSING and nthreads > 1:
+        with Pool(nthreads) as p:
+            idf_count.update(chain.from_iterable(p.map(process_partial, arr)))
+    else:
+        idf_count.update(chain.from_iterable(map(process_partial, arr)))
 
     idf_dict = defaultdict(lambda : log((num_docs+1)/(1)))
     idf_dict.update({idx:log((num_docs+1)/(c+1)) for (idx, c) in idf_count.items()})

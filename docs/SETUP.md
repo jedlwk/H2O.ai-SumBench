@@ -1,4 +1,4 @@
-# H2O SumBench - Setup Guide
+# H2O.ai SumBench - Setup Guide
 
 Complete installation and configuration guide.
 
@@ -58,7 +58,7 @@ App opens at: `http://localhost:8501`
 
 ```bash
 # Clone or download the repository
-cd H2O SumBench
+cd H2O.ai SumBench
 
 # Install all dependencies
 pip install -r requirements.txt
@@ -353,7 +353,7 @@ rm -rf ~/.cache/huggingface/transformers
 
 ```bash
 # Keep models for future use
-rm -rf H2O SumBench
+rm -rf H2O.ai SumBench
 
 # Remove models too (frees ~3GB)
 rm -rf ~/.cache/huggingface

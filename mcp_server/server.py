@@ -1,5 +1,5 @@
 """
-Build an MCP server for H2O SumBench.
+Build an MCP server for H2O.ai SumBench.
 """
 
 import os
@@ -50,7 +50,7 @@ except ImportError:
         get_metric_info,
     )
 
-mcp = FastMCP("H2O SumBench MCP Server")
+mcp = FastMCP("H2O.ai SumBench MCP Server")
 
 
 @mcp.tool()

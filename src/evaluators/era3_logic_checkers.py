@@ -25,7 +25,7 @@ def compute_nli_score(
     summary: str,
     source: str = None,
     reference_summary: str = None,
-    model_name: str = "microsoft/deberta-v3-base"
+    model_name: str = "cross-encoder/nli-deberta-v3-base"
 ) -> Dict[str, float]:
     """
     Check if summary claims are logically supported by source using Natural Language Inference.
@@ -43,7 +43,7 @@ def compute_nli_score(
         summary (str): Generated summary to check for logical consistency
         source (str, optional): Original source document that should support the summary
         reference_summary (str, optional): Not used for NLI (kept for API consistency)
-        model_name (str, optional): HuggingFace NLI model. Default "microsoft/deberta-v3-base" (~600MB)
+        model_name (str, optional): HuggingFace NLI model. Default "cross-encoder/nli-deberta-v3-base" (~600MB)
 
     Returns:
         Dict[str, float]: Result dictionary with keys:

@@ -1,4 +1,4 @@
-# Getting Started with H2O SumBench
+# Getting Started with H2O.ai SumBench
 
 **For a colleague seeing this project for the first time**
 
@@ -8,7 +8,7 @@ This guide will get you up and running in 10 minutes.
 
 ## What Is This?
 
-H2O SumBench is a **text summarization evaluation tool** with **24 metrics** organized into 5 dimensions:
+H2O.ai SumBench is a **text summarization evaluation tool** with **24 metrics** organized into 5 dimensions:
 
 - **Faithfulness** (4 metrics) - Does the summary stick to the source?
 - **Completeness** (4 metrics) - How much key information was captured?
@@ -36,7 +36,7 @@ H2O SumBench is a **text summarization evaluation tool** with **24 metrics** org
 
 ```bash
 # Navigate to project directory
-cd H2O SumBench
+cd H2O.ai SumBench
 
 # One-shot install (dependencies + spaCy model + NLTK data)
 python setup.py
@@ -202,7 +202,7 @@ python3 tests/test_h2ogpte_api.py
 ## Project Structure
 
 ```
-H2O SumBench/
+H2O.ai SumBench/
 │
 ├── setup.py                        # One-shot install script
 ├── ui/

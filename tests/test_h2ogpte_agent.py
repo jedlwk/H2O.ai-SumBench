@@ -23,8 +23,8 @@ print("Client created successfully")
 
 # Create a collection for documents
 collection_id = client.create_collection(
-    name='H2O SumBench Agent',
-    description='H2OGPTe Agent Tool Call Using H2O SumBench',
+    name='H2O.ai SumBench Agent',
+    description='H2OGPTe Agent Tool Call Using H2O.ai SumBench',
 )
 print(f"Collection created: {collection_id}")
 
