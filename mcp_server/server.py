@@ -266,22 +266,35 @@ def _build_summary(results: dict) -> dict:
 
 @mcp.tool()
 def evaluate_summary(summary: str, source: str = None, reference: str = None):
-    """Evaluate an LLM-generated summary using H2O.ai SumBench metrics.
+    """Evaluate an LLM-generated summary using H2O.ai SumBench.
 
-    Automatically selects and runs the appropriate metrics based on the
-    inputs provided:
-    - Source + Reference → all 17 metrics (full diagnostic)
-    - Source only        → 6 metrics  (faithfulness & completeness)
-    - Reference only     → 8 metrics  (word overlap & semantic similarity)
-    - Neither            → 2 metrics  (fluency & perplexity)
+    Call this tool ONCE with the full text of each input. The tool
+    automatically selects and runs all appropriate metrics — you do
+    NOT need to pick metrics yourself.
 
-    Args:
-        summary:   The summary text to evaluate (required).
-        source:    The original source document (optional).
-        reference: A reference/gold summary to compare against (optional).
+    What to pass:
+        summary   (REQUIRED) — The generated summary you want to evaluate.
+                    Pass the FULL summary text, not a filename or URL.
+        source    (optional) — The original source document that was summarized.
+                    Enables faithfulness and completeness checks.
+        reference (optional) — A human-written or gold-standard reference summary.
+                    Enables word-overlap and semantic similarity metrics.
 
-    Returns per-metric scores plus a _summary with a score table,
-    overall quality rating, and formatting guidance.
+    Provide as many inputs as you have. More inputs = more metrics:
+        summary + source + reference → 17 metrics (full diagnostic)
+        summary + source             →  6 metrics (faithfulness & completeness)
+        summary + reference          →  8 metrics (word overlap & semantic)
+        summary only                 →  2 metrics (fluency only)
+
+    Returns a dict with:
+        - Per-metric results (scores, interpretation, errors)
+        - _scenario: which input combination was detected
+        - _metrics_used: list of metric names that were run
+        - _summary: score_table, overall_quality, and formatting guidance
+
+    Present the results as a Markdown table with columns:
+    Category | Metric | Score | Interpretation.
+    Add 3-4 bullet-point insights and an overall assessment.
     """
     scenario = _detect_scenario(source, reference)
     metrics = _metrics_for_scenario(scenario)
