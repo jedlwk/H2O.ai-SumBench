@@ -57,7 +57,7 @@ spacy>=3.7.5                # Named Entity Recognition
 # Stage 1 - API Metrics (G-Eval, DAG, Prometheus)
 # No local models - uses H2OGPTE API
 # =============================================================================
-h2ogpte==1.6.54             # H2OGPTE API client
+h2ogpte==1.6.47             # H2OGPTE API client
 python-dotenv==1.0.0        # Load .env credentials
 
 # =============================================================================
