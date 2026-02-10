@@ -23,7 +23,7 @@ python3 -m pytest tests/test_all_metrics.py -v
 - Tests Era 2: Semantic metrics (BERTScore, MoverScore)
 - Tests Era 3A: Logic checkers (NLI, FactCC, AlignScore, Coverage Score)
 - Tests Era 3B: LLM-as-a-Judge (G-Eval, DAG, Prometheus)
-- Tests Completeness metrics (Semantic Coverage, BERTScore Recall, BARTScore)
+- Tests Completeness metrics (Semantic Coverage, BERTScore Recall)
 - Includes edge case testing and full pipeline integration
 - **Run this first** to verify everything works
 
@@ -79,7 +79,7 @@ python3 -m pytest tests/test_all_metrics.py -v
 - 2 Era 2 metrics (BERTScore, MoverScore)
 - 4 Era 3A metrics (NLI, FactCC, AlignScore, Coverage Score)
 - 5 Era 3B metrics (G-Eval dimensions + DAG + Prometheus)
-- 3 Completeness metrics (Semantic Coverage, BERTScore Recall, BARTScore)
+- 2 Completeness metrics (Semantic Coverage, BERTScore Recall)
 - Edge case handling tests
 - Full pipeline integration tests
 
@@ -163,4 +163,4 @@ Test execution times (approximate):
 
 **Last Updated**: 2026-02-07
 **Total Test Files**: 5
-**Coverage**: All 24 metrics across 5 dimensions (Faithfulness, Completeness, Semantic Alignment, Surface Overlap, Linguistic Quality)
+**Coverage**: All 23 metrics across 2 stages (Integrity Check, Conformance Check) + LLM-as-a-Judge

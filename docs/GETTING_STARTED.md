@@ -8,13 +8,10 @@ This guide will get you up and running in 10 minutes.
 
 ## What Is This?
 
-H2O.ai SumBench is a **text summarization evaluation tool** with **24 metrics** organized into 5 dimensions:
+H2O.ai SumBench is a **text summarization evaluation tool** with **23 metrics** in two evaluation stages plus a customizable judge:
 
-- **Faithfulness** (4 metrics) - Does the summary stick to the source?
-- **Completeness** (4 metrics) - How much key information was captured?
-- **Semantic Alignment** (3 metrics) - Does the meaning match a reference summary?
-- **Surface Overlap** (7 metrics) - How many words/phrases match the reference?
-- **Linguistic Quality** (5 metrics) - Is it readable, logical and well structured?
+- **Stage 1 — Integrity Check** (12 metrics) - Source vs Summary (always runs): faithfulness, completeness, holistic quality
+- **Stage 2 — Conformance Check** (10 metrics) - Generated vs Reference (requires reference): semantic and lexical similarity
 - **LLM-as-a-Judge** (custom) - Define your own evaluation criteria via prompt template
 
 **Use case**: Evaluate how good a summary is compared to the original text.
@@ -134,35 +131,36 @@ If it doesn't, manually visit: `http://localhost:8501`
 
 ### Quick Reference
 
-**Faithfulness**:
+**Stage 1 — Integrity Check** (source vs summary, always runs):
+
+*Faithfulness:*
 - NLI: Is summary logically supported by source?
 - FactCC: BERT-based consistency check
 - AlignScore: Unified factual alignment score
-- G-Eval Faithfulness: LLM-judged factual accuracy (API)
-
-**Completeness**:
 - Entity Coverage: Are named entities preserved?
+
+*Completeness:*
 - Semantic Coverage: % of source sentences covered
 - BERTScore Recall: What % of source meaning captured?
-- G-Eval Relevance: LLM-judged information coverage (API)
 
-**Semantic Alignment**:
+*Holistic Assessment (API):*
+- DAG: Decision tree evaluation
+- Prometheus: Open-source LLM judge
+- G-Eval Faithfulness, Relevance, Coherence, Fluency
+
+**Stage 2 — Conformance Check** (requires reference summary):
+
+*Semantic:*
 - BERTScore: Contextual meaning similarity
 - MoverScore: Advanced semantic alignment
-- BARTScore: Generation likelihood score
 
-**Surface Overlap**:
+*Lexical:*
 - ROUGE-1/2/L: Word and phrase overlap
 - BLEU: N-gram precision
 - METEOR: Semantic matching with synonyms
 - chrF++: Character-level F-score
 - Levenshtein: Edit distance similarity
-
-**Linguistic Quality**:
 - Perplexity: GPT-2 language model fluency
-- G-Eval Fluency / Coherence: LLM-judged quality (API)
-- DAG: Decision tree evaluation (API)
-- Prometheus: Open-source LLM judge (API)
 
 **For details**: See [METRICS.md](METRICS.md)
 
@@ -330,13 +328,11 @@ python3 -m pytest tests/test_all_metrics.py -v
 | Test API | `python3 tests/test_h2ogpte_api.py` |
 | View docs | Open `docs/METRICS.md` in browser |
 
-| Dimension | Count | Type | Time | Best For |
-|-----------|-------|------|------|----------|
-| Faithfulness | 4 | Mixed | ~15s | Fact-checking |
-| Completeness | 4 | Mixed | ~10s | Information coverage |
-| Semantic Alignment | 3 | Local | ~10s | Reference matching |
-| Surface Overlap | 7 | Local | ~2s | Word/phrase overlap |
-| Linguistic Quality | 5 | Mixed | ~5s | Writing quality |
+| Stage | Count | Type | Time | Best For |
+|-------|-------|------|------|----------|
+| Stage 1: Integrity | 12 | Mixed | ~30s | Faithfulness, completeness, quality |
+| Stage 2: Conformance | 10 | Local | ~10s | Reference matching |
+| LLM-as-a-Judge | 1 | API | ~15s | Custom criteria |
 
 ---
 

@@ -2,14 +2,11 @@
 
 **Comprehensive Summarization Evaluation Framework**
 
-24 built-in metrics across 5 evaluation dimensions, plus a customizable **LLM-as-a-Judge** for your own criteria.
+23 built-in metrics across two evaluation stages, plus a customizable **LLM-as-a-Judge** for your own criteria.
 
-1. **Faithfulness:** Does the summary stick to the source without hallucinating?
-2. **Completeness:** How much of the essential source meaning was captured?
-3. **Semantic Alignment:** How well does the summary match the reference summary?
-4. **Surface Overlap:** How many specific words/phrases match the reference?
-5. **Linguistic Quality:** Is the output readable, logical and well structured?
-6. **LLM-as-a-Judge:** Custom prompt template — define your own evaluation criteria and have the LLM score 1-10 with explanation.
+1. **Stage 1 — Integrity Check:** Source vs Summary (always runs) — faithfulness, completeness, holistic quality
+2. **Stage 2 — Conformance Check:** Generated vs Reference (requires reference summary) — semantic and lexical similarity
+3. **LLM-as-a-Judge:** Custom prompt template — define your own evaluation criteria and have the LLM score 1-10 with explanation.
 
 ---
 
@@ -102,7 +99,11 @@ python agents/h2o/orchestrator.py --agent-type agent_with_mcp --sample-idx 0 --d
 
 ## Metrics Overview
 
-### 1. Faithfulness
+### Stage 1: Integrity Check (Source vs Summary)
+
+These metrics always run — they only need the source document and the generated summary.
+
+#### 1.1 Faithfulness
 Does the summary stick to the source without hallucinating?
 
 | Metric | Type | Description |
@@ -110,29 +111,41 @@ Does the summary stick to the source without hallucinating?
 | NLI | Local | Natural language inference - does source entail summary? |
 | FactCC | Local | BERT-based factual consistency classifier |
 | AlignScore | Local | Unified alignment score via RoBERTa |
-| G-Eval Faithfulness | API | LLM-judged factual accuracy |
-| FactChecker | API | LLM-based fact-checking against source |
+| Entity Coverage | Local | Are named entities preserved? |
 
-### 2. Completeness
+#### 1.2 Completeness
 How much of the essential source meaning was captured?
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| Entity Coverage | Local | Are named entities preserved? |
 | Semantic Coverage | Local | % of source sentences semantically covered |
 | BERTScore Recall | Local | What % of source meaning captured? |
-| G-Eval Relevance | API | LLM-judged information coverage |
 
-### 3. Semantic Alignment
-How well does the summary match the reference summary?
+#### 1.3 Holistic Assessment
+LLM-judged quality across multiple dimensions.
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| DAG | API | Decision tree: accuracy, completeness, clarity |
+| Prometheus | API | Open-source LLM judge |
+| G-Eval Faithfulness | API | LLM-judged factual accuracy |
+| G-Eval Relevance | API | LLM-judged information coverage |
+| G-Eval Coherence | API | LLM-judged logical flow |
+| G-Eval Fluency | API | LLM-judged grammatical quality |
+
+### Stage 2: Conformance Check (Generated vs Reference)
+
+These metrics require a reference summary for comparison.
+
+#### 2.1 Semantic Similarity
+How well does the summary match the reference in meaning?
 
 | Metric | Type | Description |
 |--------|------|-------------|
 | BERTScore | Local | Contextual embedding similarity |
 | MoverScore | Local | Earth Mover's Distance on embeddings |
-| BARTScore | Local | Generation likelihood score |
 
-### 4. Surface Overlap
+#### 2.2 Lexical Similarity
 How many specific words/phrases match the reference?
 
 | Metric | Type | Description |
@@ -142,19 +155,9 @@ How many specific words/phrases match the reference?
 | METEOR | Local | Alignment with synonyms and stemming |
 | chrF++ | Local | Character-level F-score |
 | Levenshtein | Local | Edit distance ratio |
-
-### 5. Linguistic Quality
-Is the output readable, logical and well structured?
-
-| Metric | Type | Description |
-|--------|------|-------------|
 | Perplexity | Local | GPT-2 language model fluency |
-| G-Eval Fluency | API | LLM-judged grammatical quality |
-| G-Eval Coherence | API | LLM-judged logical flow |
-| DAG | API | Decision tree: accuracy, completeness, clarity |
-| Prometheus | API | Open-source LLM judge |
 
-### 6. LLM-as-a-Judge (Custom)
+### LLM-as-a-Judge (Custom)
 Define your own evaluation criteria using a prompt template.
 
 | Feature | Description |
@@ -245,7 +248,7 @@ H2O SumBench/
 ## Documentation
 
 - **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - First-time setup walkthrough
-- **[docs/METRICS.md](docs/METRICS.md)** - Complete guide to all 24 metrics + custom judge
+- **[docs/METRICS.md](docs/METRICS.md)** - Complete guide to all 23 metrics + custom judge
 - **[docs/SETUP.md](docs/SETUP.md)** - Installation troubleshooting
 
 ---

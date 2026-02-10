@@ -79,7 +79,7 @@ On first use, models auto-download:
 | Dimension | Models | Size | Download Time |
 |-----------|--------|------|---------------|
 | Surface Overlap | NLTK data | ~100MB | <1 min |
-| Semantic Alignment | BERTScore, MoverScore, BARTScore | ~3.3GB | 3-5 min |
+| Semantic Alignment | BERTScore, MoverScore | ~1.7GB | 2-3 min |
 | Faithfulness | DeBERTa-v3, BERT-MNLI, AlignScore | ~2.3GB | 2-3 min |
 | Linguistic Quality | GPT-2 | ~600MB | 1-2 min |
 
