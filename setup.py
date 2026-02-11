@@ -11,6 +11,7 @@ Usage:
 
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import venv
@@ -35,19 +36,45 @@ def venv_python():
     return os.path.join(VENV_DIR, "bin", "python")
 
 
+def pip_works(py):
+    """Return True if `py -m pip --version` exits 0."""
+    return subprocess.run(
+        [py, "-m", "pip", "--version"],
+        capture_output=True,
+    ).returncode == 0
+
+
 def create_venv():
     """Create a virtual environment if it doesn't already exist."""
     py = venv_python()
+
+    # If venv exists, check it actually works
     if os.path.isfile(py):
-        print(f"\n  Virtual environment already exists at {VENV_DIR}/")
-        return
+        if pip_works(py):
+            print(f"\n  Virtual environment already exists at {VENV_DIR}/")
+            return
+        # Broken venv — nuke and recreate
+        print(f"\n  Existing {VENV_DIR}/ is broken (pip not functional). Recreating ...")
+        shutil.rmtree(VENV_DIR)
 
     print(f"\n  Creating virtual environment in {VENV_DIR}/ ...")
     venv.create(VENV_DIR, with_pip=True)
 
     if not os.path.isfile(py):
         sys.exit(f"ERROR: Failed to create virtual environment (expected {py}).")
-    print(f"  Created.")
+
+    # Verify pip; bootstrap if needed
+    if not pip_works(py):
+        print("  pip not available — bootstrapping with ensurepip ...")
+        result = subprocess.run([py, "-m", "ensurepip", "--upgrade"], capture_output=True)
+        if result.returncode != 0 or not pip_works(py):
+            sys.exit(
+                "ERROR: Could not install pip in the virtual environment.\n"
+                "  macOS: try `brew install python3` and re-run with that Python.\n"
+                "  Linux: try `sudo apt install python3-venv` (Debian/Ubuntu)."
+            )
+
+    print("  Created.")
 
 
 def run(description, cmd):
@@ -60,6 +87,20 @@ def run(description, cmd):
         print(f"\nERROR: {description} failed (exit code {result.returncode}).")
         sys.exit(result.returncode)
     print(f"\n  Done.\n")
+
+
+def verify_install(py):
+    """Quick smoke-test: can the venv Python import the key packages?"""
+    check = subprocess.run(
+        [py, "-c", "import streamlit, torch, transformers"],
+        capture_output=True, text=True,
+    )
+    if check.returncode != 0:
+        print("\nERROR: Post-install verification failed.")
+        print("  The following packages could not be imported:")
+        print(f"  {check.stderr.strip()}")
+        print("\n  Try deleting .venv/ and re-running: python setup.py")
+        sys.exit(1)
 
 
 def main():
@@ -103,6 +144,9 @@ def main():
         "Downloading NLTK data (punkt_tab)",
         [py, "-c", "import nltk; nltk.download('punkt_tab')"],
     )
+
+    # 6. Verify key packages are importable
+    verify_install(py)
 
     # Done
     if platform.system() == "Windows":
