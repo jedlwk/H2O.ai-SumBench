@@ -17,7 +17,7 @@ torch>=2.8.0                # PyTorch (CPU or CUDA - both work)
 torchvision>=0.23.0         # Required by some model pipelines
 transformers>=4.45.0        # HuggingFace models (NLI, FactCC, AlignScore, Perplexity)
 tokenizers>=0.20.3          # Fast tokenization
-sentencepiece==0.2.0        # Tokenizer for some models
+sentencepiece>=0.2.0        # Tokenizer for some models
 tiktoken>=0.12.0            # Tokenizer for NLI / OpenAI-style models
 protobuf>=3.20.0            # Model serialization
 
@@ -28,8 +28,8 @@ protobuf>=3.20.0            # Model serialization
 rouge-score==0.1.2          # ROUGE-1/2/L
 sacrebleu==2.4.0            # BLEU, chrF++
 nltk==3.9.1                 # METEOR (requires WordNet data)
-python-Levenshtein==0.25.0  # Levenshtein distance
-Levenshtein==0.25.0         # Alternative binding
+python-Levenshtein>=0.26.0  # Levenshtein distance (>=0.26 for Python 3.13)
+Levenshtein>=0.26.0         # C extension (>=0.26 for Python 3.13)
 
 # =============================================================================
 # Stage 2 - Semantic Metrics (BERTScore, MoverScore)
