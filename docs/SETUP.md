@@ -41,7 +41,7 @@ App opens at: `http://localhost:8501`
 
 ### Prerequisites
 
-**Python Version**: 3.8 or higher
+**Python Version**: 3.9 or higher
 - Check: `python3 --version`
 - If needed: Install from [python.org](https://www.python.org/downloads/)
 
