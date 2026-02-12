@@ -154,9 +154,11 @@ def main():
 
     # Done
     if platform.system() == "Windows":
-        activate = f"{VENV_DIR}\\Scripts\\activate"
+        activate_cmd = f"{VENV_DIR}\\Scripts\\activate.bat"
+        activate_ps = f"{VENV_DIR}\\Scripts\\Activate.ps1"
     else:
-        activate = f"source {VENV_DIR}/bin/activate"
+        activate_cmd = f"source {VENV_DIR}/bin/activate"
+        activate_ps = None
 
     print("\n" + "=" * 60)
     print("  Setup complete!")
@@ -164,7 +166,12 @@ def main():
     print()
     print("Next steps:")
     print(f"  1. Activate the virtual environment:")
-    print(f"       {activate}")
+    print(f"       {activate_cmd}")
+    if activate_ps:
+        print(f"       {activate_ps}   (PowerShell)")
+        print()
+        print("     If PowerShell blocks the script, run this first:")
+        print("       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser")
     print()
     print("  2. Go to .env.example, add your H2OGPTE API key, and rename the file to .env")
     print()

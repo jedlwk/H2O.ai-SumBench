@@ -21,7 +21,7 @@ H2O.ai SumBench is a **text summarization evaluation tool** with **23 metrics** 
 ## Prerequisites
 
 **You need**:
-- Python 3.8+ ([check](https://www.python.org/downloads/))
+- Python 3.10+ ([check](https://www.python.org/downloads/))
 - ~6GB disk space
 - 8GB+ RAM
 

@@ -25,7 +25,7 @@ import pytest
 # ---------------------------------------------------------------------------
 
 def _load_catalog():
-    with open(SERVER_PATH) as f:
+    with open(SERVER_PATH, encoding='utf-8') as f:
         tree = ast.parse(f.read())
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
@@ -154,7 +154,7 @@ class TestBuildSummary:
 class TestToolDefinitions:
 
     def _source(self):
-        with open(SERVER_PATH) as f:
+        with open(SERVER_PATH, encoding='utf-8') as f:
             return f.read()
 
     def test_evaluate_summary_defined(self):
@@ -180,7 +180,7 @@ class TestSystemBase:
 
     def _content(self):
         path = os.path.join(PROJECT_ROOT, 'agents', 'prompts', 'system_base.md')
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             return f.read()
 
     def test_says_17_metrics(self):

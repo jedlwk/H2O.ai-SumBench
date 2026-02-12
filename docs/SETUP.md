@@ -380,7 +380,7 @@ pip uninstall -r requirements.txt -y
 For containerized deployment:
 
 ```dockerfile
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 COPY requirements.txt .

@@ -12,6 +12,8 @@
 
 ## Quick Start
 
+**Requires Python 3.10+** — [download](https://www.python.org/downloads/)
+
 ```bash
 # 1. One-shot install (creates .venv, installs all dependencies)
 python setup.py
