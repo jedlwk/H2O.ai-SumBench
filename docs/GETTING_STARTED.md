@@ -66,7 +66,8 @@ python -c "import nltk; nltk.download('punkt_tab')"
 
 **Skip this if you only want the 14 local metrics.**
 
-For API metrics (G-Eval, DAG, Prometheus), create `.env` file:
+For API metrics (G-Eval, DAG, Prometheus), you need an H2OGPTe API key.
+See [HOW_TO_GET_H2OGPTE_API.pdf](../HOW_TO_GET_H2OGPTE_API.pdf) for a step-by-step guide, then create `.env` file:
 
 ```bash
 # In project root directory

@@ -99,7 +99,9 @@ Models cache to: `~/.cache/huggingface/`
 
 #### Step 1: Get API Credentials
 
-Contact your H2OGPTE administrator for:
+See [HOW_TO_GET_H2OGPTE_API.pdf](../HOW_TO_GET_H2OGPTE_API.pdf) for a step-by-step visual guide.
+
+You will need:
 1. API key (looks like: `sk-...`)
 2. Instance address (looks like: `https://your-instance.h2ogpte.com`)
 

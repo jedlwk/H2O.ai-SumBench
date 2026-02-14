@@ -195,6 +195,7 @@ H2O SumBench/
 ├── setup.py                        # One-shot install script
 ├── requirements.txt                # Python dependencies
 ├── .env.example                    # API credentials (for LLM Judge metrics)
+├── HOW_TO_GET_H2OGPTE_API.pdf      # Step-by-step guide to get your H2OGPTe API key
 │
 ├── ui/                             # Streamlit application
 │   └── app.py                      # Main entry point (standalone evaluators)
