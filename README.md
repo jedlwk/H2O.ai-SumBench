@@ -258,14 +258,22 @@ H2O SumBench/
 
 ## Version
 
-- **v3.1** - LLM-as-a-Judge: custom prompt template evaluation with batch support
-- **v3.0** - GitHub-ready release, setup script, documentation refresh
-- **v2.4** - New prompt architecture, enhanced documentation
-- **v2.3** - MCP warmup, system installation and dynamic Jinja2 prompt
-- **v2.2** - Restructure data folder, pipeline and documentation
-- **v2.1** - Added agent integration and MCP server support
-- **v2.0** - 24 metrics, educational UI
-- **v1.0** - 15 metrics
+| Version | Highlights |
+|---------|------------|
+| **v3.0** (final) | LLM-as-a-Judge, MCP server, agent integration, one-shot setup |
+| **v2.2** | Data pipeline restructure, documentation overhaul |
+| **v2.1** | Agent integration, MCP server support |
+| **v2.0** | 24 metrics, educational Streamlit UI |
+| **v1.1** | Semantic and faithfulness metrics |
+| **v1.0** | Initial release — 15 lexical metrics |
+
+See [CHANGELOG.md](docs/CHANGELOG.md) for full details.
+
+---
+
+## Contact
+
+Bugs, issues, or questions? Reach out at **jed.lee@h2o.ai**
 
 ## License
 
