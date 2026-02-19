@@ -39,7 +39,14 @@ Comprehensive summarization evaluation framework — **23 built-in metrics** acr
 
 These steps are the same on **macOS**, **Windows**, and **Linux**. Where a command differs, both versions are shown.
 
-### 1. Create your `.env` file (optional — only for LLM-judged metrics)
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/jedlwk/H2O-SumBench.git
+cd H2O-SumBench
+```
+
+### 2. Create your `.env` file (optional — only for LLM-judged metrics)
 
 | macOS / Linux | Windows |
 |---------------|---------|
@@ -54,7 +61,7 @@ H2OGPTE_ADDRESS=https://h2ogpte.genai.h2o.ai/
 
 > **Where to get these:** Refer to the [Step-by-Step Guide (PDF)](./HOW_TO_GET_H2OGPTE_API.pdf)
 
-### 2. Start the app
+### 3. Start the app
 
 | macOS / Linux | Windows |
 |---------------|---------|
@@ -68,7 +75,7 @@ This single command:
 
 > **Note:** You need Python 3.10+ **installed** somewhere on your system, but it doesn't have to be your default. The script searches for `python3.13`, `python3.12`, `python3.11`, `python3.10` automatically. On Windows, it also checks the `py` launcher (`py -3.13`, etc.).
 
-### 3. Open
+### 4. Open
 
 Go to **http://localhost:8501** in your browser. Done.
 
