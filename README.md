@@ -46,7 +46,7 @@ git clone https://github.com/jedlwk/H2O-SumBench.git
 cd H2O-SumBench
 ```
 
-### 2. Create your `.env` file (optional — only for LLM-judged metrics)
+### 2. Create your `.env` file
 
 | macOS / Linux | Windows |
 |---------------|---------|
