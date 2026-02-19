@@ -1,30 +1,122 @@
 # H2O SumBench
 
-**Comprehensive Summarization Evaluation Framework**
+Comprehensive summarization evaluation framework — **23 built-in metrics** across two evaluation stages, plus a customizable **LLM-as-a-Judge** for your own criteria.
 
-23 built-in metrics across two evaluation stages, plus a customizable **LLM-as-a-Judge** for your own criteria.
-
-1. **Stage 1 — Integrity Check:** Source vs Summary (always runs) — faithfulness, completeness, holistic quality
-2. **Stage 2 — Conformance Check:** Generated vs Reference (requires reference summary) — semantic and lexical similarity
-3. **LLM-as-a-Judge:** Custom prompt template — define your own evaluation criteria and have the LLM score 1-10 with explanation.
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![AI](https://img.shields.io/badge/AI-H2OGPTE-FEC925?style=flat-square)
+![PyTorch](https://img.shields.io/badge/Framework-PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=flat-square)
 
 ---
 
-## Quick Start
+## Features
 
-**Requires Python 3.10+** — [download](https://www.python.org/downloads/)
+| Feature | Description |
+|---------|-------------|
+| **Stage 1 — Integrity Check** | Source vs Summary (always runs) — faithfulness, completeness, holistic quality |
+| **Stage 2 — Conformance Check** | Generated vs Reference (requires reference summary) — semantic and lexical similarity |
+| **LLM-as-a-Judge** | Custom prompt template — define your own evaluation criteria, scored 1–10 with explanation |
+| **Standalone Library** | Use metrics directly in Python code via `tool_logic.py` |
+| **Agent + Code Execution** | Let an H2OGPTE agent call evaluation metrics as tools |
+| **Agent + MCP Server** | Structured tool access via Model Context Protocol |
+
+---
+
+## Prerequisites
+
+> **Using Docker?** Skip straight to [Docker Setup](#docker-setup) — no local Python needed.
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| **Python** | 3.10+ | Tested on 3.10, 3.11, 3.13 |
+| **pip** | 20+ | Comes with Python |
+| **H2OGPTE** | Optional | Required only for LLM-judged metrics (G-Eval, DAG, Prometheus) and agent modes |
+
+---
+
+## Quick Start (Local)
+
+These steps are the same on **macOS**, **Windows**, and **Linux**. Where a command differs, both versions are shown.
+
+### 1. One-shot install
 
 ```bash
-# 1. One-shot install (creates .venv, installs all dependencies)
 python setup.py
+```
 
-# 2. Activate the virtual environment
-source .venv/bin/activate        # macOS / Linux
-.venv\Scripts\activate           # Windows
+This creates a `.venv`, installs all dependencies, and downloads NLP models.
 
-# 3. Launch
+### 2. Activate the virtual environment
+
+| macOS / Linux | Windows |
+|---------------|---------|
+| `source .venv/bin/activate` | `.venv\Scripts\activate` |
+
+### 3. Create your `.env` file (optional — only for LLM-judged metrics)
+
+| macOS / Linux | Windows |
+|---------------|---------|
+| `cp .env.example .env` | `copy .env.example .env` |
+
+Then open `.env` and add your H2OGPTE credentials:
+
+```
+H2OGPTE_API_KEY=your_api_key_here
+H2OGPTE_ADDRESS=https://h2ogpte.genai.h2o.ai/
+```
+
+> **Where to get these:** Refer to the [Step-by-Step Guide (PDF)](./HOW_TO_GET_H2OGPTE_API.pdf)
+
+### 4. Launch
+
+```bash
 streamlit run ui/app.py
 ```
+
+Go to **http://localhost:8501** in your browser. Done.
+
+---
+
+## Docker Setup
+
+Works on **macOS**, **Windows**, and **Linux** — anywhere Docker runs. No local Python installation required.
+
+### 1. Create your `.env` file
+
+| macOS / Linux | Windows |
+|---------------|---------|
+| `cp .env.example .env` | `copy .env.example .env` |
+
+Edit `.env` with your H2OGPTE credentials (same as step 3 above).
+
+### 2. Build and run
+
+```bash
+docker build -t sumbench .
+docker run -p 8501:8501 --env-file .env sumbench
+```
+
+### 3. Open the app
+
+Go to **http://localhost:8501**.
+
+### Stop
+
+```bash
+docker stop $(docker ps -q --filter ancestor=sumbench)
+```
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `H2OGPTE_API_KEY` | For LLM metrics | Your H2OGPTE API key |
+| `H2OGPTE_ADDRESS` | For LLM metrics | Your H2OGPTE instance URL |
+| `OPENAI_API_KEY` | No | Optional — if using OpenAI models |
+| `ANTHROPIC_API_KEY` | No | Optional — if using Claude models |
 
 ---
 
@@ -184,7 +276,19 @@ All local models download automatically on first use:
 | MiniLM-L6 | ~80MB | Semantic Coverage |
 | spaCy en_core_web_sm | ~12MB | Coverage Score |
 
-**Total: ~5-6GB** (models cached after first download)
+**Total: ~5–6 GB** (models cached after first download)
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| UI | Streamlit |
+| Deep Learning | PyTorch |
+| Embeddings | HuggingFace Transformers |
+| NLP | spaCy, NLTK |
+| AI / LLM | H2OGPTE (LLM-judged metrics + agent orchestration) |
 
 ---
 
@@ -194,6 +298,7 @@ All local models download automatically on first use:
 H2O SumBench/
 ├── setup.py                        # One-shot install script
 ├── requirements.txt                # Python dependencies
+├── Dockerfile                      # Docker container build
 ├── .env.example                    # API credentials (for LLM Judge metrics)
 ├── HOW_TO_GET_H2OGPTE_API.pdf      # Step-by-step guide to get your H2OGPTe API key
 │
@@ -250,9 +355,9 @@ H2O SumBench/
 
 ## Documentation
 
-- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - First-time setup walkthrough
-- **[docs/METRICS.md](docs/METRICS.md)** - Complete guide to all 23 metrics + custom judge
-- **[docs/SETUP.md](docs/SETUP.md)** - Installation troubleshooting
+- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** — First-time setup walkthrough
+- **[docs/METRICS.md](docs/METRICS.md)** — Complete guide to all 23 metrics + custom judge
+- **[docs/SETUP.md](docs/SETUP.md)** — Installation troubleshooting
 
 ---
 
@@ -271,10 +376,12 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for full details.
 
 ---
 
-## Contact
+## Author
 
-Bugs, issues, or questions? Reach out at **jed.lee@h2o.ai**
+**Jed Lee** — [jed.lee@h2o.ai](mailto:jed.lee@h2o.ai)
+
+---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
