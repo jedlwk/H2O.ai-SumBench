@@ -16,17 +16,16 @@ import subprocess
 import sys
 import venv
 
-REQUIRED_PYTHON = (3, 10)
+MIN_PYTHON = (3, 10)
 VENV_DIR = ".venv"
 
 
 def check_python_version():
-    """Exit early if the Python version is not 3.10.x."""
-    if sys.version_info[:2] != REQUIRED_PYTHON:
+    """Exit early if the Python version is too old."""
+    if sys.version_info < MIN_PYTHON:
         sys.exit(
-            f"ERROR: Python {REQUIRED_PYTHON[0]}.{REQUIRED_PYTHON[1]} is required "
-            f"(you have {platform.python_version()}).\n"
-            f"  Install Python 3.10 from https://www.python.org/downloads/"
+            f"ERROR: Python {MIN_PYTHON[0]}.{MIN_PYTHON[1]}+ is required "
+            f"(you have {platform.python_version()})."
         )
     if platform.system() == "Windows":
         print("  Note: Windows requires the Microsoft Visual C++ Redistributable.")
