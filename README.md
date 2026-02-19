@@ -39,21 +39,7 @@ Comprehensive summarization evaluation framework — **23 built-in metrics** acr
 
 These steps are the same on **macOS**, **Windows**, and **Linux**. Where a command differs, both versions are shown.
 
-### 1. One-shot install
-
-```bash
-python setup.py
-```
-
-This creates a `.venv`, installs all dependencies, and downloads NLP models.
-
-### 2. Activate the virtual environment
-
-| macOS / Linux | Windows |
-|---------------|---------|
-| `source .venv/bin/activate` | `.venv\Scripts\activate` |
-
-### 3. Create your `.env` file (optional — only for LLM-judged metrics)
+### 1. Create your `.env` file (optional — only for LLM-judged metrics)
 
 | macOS / Linux | Windows |
 |---------------|---------|
@@ -68,11 +54,21 @@ H2OGPTE_ADDRESS=https://h2ogpte.genai.h2o.ai/
 
 > **Where to get these:** Refer to the [Step-by-Step Guide (PDF)](./HOW_TO_GET_H2OGPTE_API.pdf)
 
-### 4. Launch
+### 2. Start the app
 
-```bash
-streamlit run ui/app.py
-```
+| macOS / Linux | Windows |
+|---------------|---------|
+| `./start.sh` | `start.bat` |
+
+This single command:
+- **Finds Python 3.10+** automatically (even if your default `python3` is older)
+- **Creates a `.venv`** virtual environment (or recreates it if the existing one is incomplete)
+- Installs all Python dependencies, spaCy models, and NLTK data
+- Launches the Streamlit app
+
+> **Note:** You need Python 3.10+ **installed** somewhere on your system, but it doesn't have to be your default. The script searches for `python3.13`, `python3.12`, `python3.11`, `python3.10` automatically. On Windows, it also checks the `py` launcher (`py -3.13`, etc.).
+
+### 3. Open
 
 Go to **http://localhost:8501** in your browser. Done.
 
@@ -296,7 +292,9 @@ All local models download automatically on first use:
 
 ```
 H2O SumBench/
-├── setup.py                        # One-shot install script
+├── start.sh                        # One-command start (macOS / Linux)
+├── start.bat                       # One-command start (Windows)
+├── setup.py                        # Environment setup (called by start scripts)
 ├── requirements.txt                # Python dependencies
 ├── Dockerfile                      # Docker container build
 ├── .env.example                    # API credentials (for LLM Judge metrics)
